@@ -24,7 +24,7 @@
 
       <div class="hero-grid">
         <div>
-          <p class="eyebrow">Free • Open Source • Rust • Tree-sitter</p>
+          <p class="eyebrow">Structural diffs • API change tracking • clone detection</p>
           <h1>Structural code analysis tools for real-world repos</h1>
           <p class="lead">
             Two focused CLI tools for TypeScript and C# teams: <strong>Structix</strong> for structural diffs and duplicate detection,
@@ -108,21 +108,28 @@ $ analyzer-cli --repo . --base main --head HEAD --format pr-comment
     <section class="section muted">
       <div class="container">
         <div class="section-head">
-          <h2>Why this feels open-source</h2>
-          <p>Local-first CLIs, plain reports, reproducible builds, zero SaaS lock-in.</p>
+          <h2>Why two tools?</h2>
+          <p>Same problem space, two different AI-assisted implementations, and two useful review styles.</p>
         </div>
-        <div class="grid three">
+        <div class="grid two">
           <article class="card">
-            <h3>Hackable</h3>
-            <p>Rust codebases with clear module boundaries and tree-sitter parsing at the core.</p>
+            <h3>Different origins, shared goals</h3>
+            <p>
+              <strong>Structix</strong> was designed primarily with Claude, while <strong>Analyzer</strong> was designed primarily with Codex,
+              both from broadly similar requirements around structural analysis, diffs, reporting, and developer workflow support.
+            </p>
+            <p>
+              Keeping both in one repo makes the comparison useful: you can see where the designs converge, where they differ,
+              and which workflow is a better fit for your team.
+            </p>
           </article>
           <article class="card">
-            <h3>Portable</h3>
-            <p>Single-binary distribution model. Build locally or publish release binaries for each platform.</p>
-          </article>
-          <article class="card">
-            <h3>CI-Friendly</h3>
-            <p>JSON, HTML, markdown, and PR-comment outputs make these tools easy to wire into reviews.</p>
+            <h3>Two perspectives on code review</h3>
+            <ul>
+              <li><strong>Structix</strong> emphasizes entity-level diffs, duplicate detection, and compact structural review.</li>
+              <li><strong>Analyzer</strong> emphasizes repo-wide comparison, API change reporting, clone drift, and PR-oriented output.</li>
+              <li>Together they also serve as a practical side-by-side experiment in AI-assisted tool design.</li>
+            </ul>
           </article>
         </div>
       </div>
