@@ -191,7 +191,7 @@ cargo build --release -p analyzer-cli</code></pre>
         <div class="grid two">
           <article class="card example-card">
             <h3>Structix HTML report</h3>
-            <p>Real sample generated from the TypeScript + C# Tetris demo as it evolved from scaffold to gameplay plus SQLite-backed high scores.</p>
+            <p>Real sample generated from the TypeScript + C# Tetris demo after a focused refactor that introduced renamed files, moved symbols, and modified entity signatures.</p>
             <div class="example-preview browser-frame">
               <div class="browser-bar"></div>
               <iframe src="./examples/tetris-structix-report.html" title="Structix Tetris example report" loading="lazy"></iframe>
@@ -203,15 +203,15 @@ cargo build --release -p analyzer-cli</code></pre>
 
           <article class="card example-card">
             <h3>Analyzer HTML + PR comment</h3>
-            <p>Real Analyzer outputs for the same Tetris demo change range, including HTML review output and a PR-comment summary.</p>
+            <p>Real Analyzer outputs for the same Tetris demo refactor, highlighting renamed files, removed APIs, changed contracts, and modified symbols.</p>
             <pre class="example-pre"><code>## Risk
-- risk 20%: Added API `SqliteHighScoreStore`
-- risk 20%: Added API `InitializeAsync`
-- risk 20%: Added API `GetTopScoresAsync`
+- risk 98%: Removed API `SqliteHighScoreStore`
+- risk 98%: Removed API `InitializeAsync`
+- risk 98%: Removed API `SubmitHighScoreRequest`
 
 # Change Report
 
-Detected 10 added files, 2 modified files, 33 symbol changes, and 32 api changes.</code></pre>
+Detected 4 added files, 4 modified files, 1 removed file, 4 renamed files, 42 symbol changes, and 41 api changes.</code></pre>
             <div class="cta-row">
               <a class="button secondary" href="./examples/tetris-analyzer-report.html">Open Analyzer HTML sample</a>
               <a class="button secondary" href="./examples/tetris-analyzer-pr-comment.txt">Open PR-comment sample</a>

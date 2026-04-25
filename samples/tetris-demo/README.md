@@ -78,19 +78,21 @@ Content-Type: application/json
 
 This repo now supports repo-relative path filters, so you can analyze this sample while keeping it inside the main monorepo.
 
+The current checked-in example reports are generated from the range `f2123e8..7561b1e`, which captures a frontend refactor plus a backend/API refactor. That produces renamed, removed, modified, and moved entities instead of a report dominated only by additions.
+
 ### Structix
 
 ```bash
 cd vAnthropic
-cargo run -- diff .. --from ecce58c --to f2123e8 --path samples/tetris-demo --html -o ../site/examples/tetris-structix-report.html
+cargo run -- diff .. --from f2123e8 --to 7561b1e --path samples/tetris-demo --html -o ../site/examples/tetris-structix-report.html
 ```
 
 ### Analyzer
 
 ```bash
 cd vOpenAI
-cargo run -p analyzer-cli -- --repo .. --base ecce58c --head f2123e8 --path samples/tetris-demo --format html > ../site/examples/tetris-analyzer-report.html
-cargo run -p analyzer-cli -- --repo .. --base ecce58c --head f2123e8 --path samples/tetris-demo --format pr-comment > ../site/examples/tetris-analyzer-pr-comment.txt
+cargo run -p analyzer-cli -- --repo .. --base f2123e8 --head 7561b1e --path samples/tetris-demo --format html > ../site/examples/tetris-analyzer-report.html
+cargo run -p analyzer-cli -- --repo .. --base f2123e8 --head 7561b1e --path samples/tetris-demo --format pr-comment > ../site/examples/tetris-analyzer-pr-comment.txt
 ```
 
 ### Generated samples checked into the repo

@@ -140,6 +140,7 @@ Real checked-in samples:
 
 - `site/examples/tetris-analyzer-report.html`
 - `site/examples/tetris-analyzer-pr-comment.txt`
+- Generated from the Tetris demo refactor range `f2123e8..7561b1e`, which includes renamed files, removed APIs, modified symbols, and changed contracts.
 
 ---
 

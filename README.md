@@ -46,7 +46,7 @@ Open it in a browser to view:
 
 ## Real Example Reports
 
-Generated sample outputs based on the in-repo TypeScript + C# Tetris demo are available at:
+Generated sample outputs based on the in-repo TypeScript + C# Tetris demo refactor range (`f2123e8..7561b1e`) are available at:
 
 - [`site/examples/tetris-structix-report.html`](./site/examples/tetris-structix-report.html)
 - [`site/examples/tetris-analyzer-report.html`](./site/examples/tetris-analyzer-report.html)
