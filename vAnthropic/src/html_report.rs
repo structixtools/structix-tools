@@ -35,12 +35,22 @@ body { font-family: system-ui, -apple-system, sans-serif; background: var(--colo
 .pill-renamed  { background: rgba(168,85,247,0.15);  color: var(--color-renamed); }
 
 /* Layout */
-#layout { display: grid; grid-template-columns: 220px 1fr 260px; flex: 1; min-height: 0; }
+#layout { display: grid; grid-template-columns: 220px 1fr 360px; flex: 1; min-height: 0; }
 #sidebar { overflow-y: auto; border-right: 1px solid var(--color-border); padding: 0.6rem; }
 #main-panel { overflow-y: auto; padding: 1rem; }
-#right-panel { overflow-y: auto; border-left: 1px solid var(--color-border); padding: 0.75rem; display: flex; flex-direction: column; }
+#right-panel { overflow-y: auto; border-left: 1px solid var(--color-border); padding: 0.75rem; display: flex; flex-direction: column; gap: 0.75rem; }
 #right-panel h3 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-muted); margin-bottom: 0.5rem; flex-shrink: 0; }
-#flow-svg { flex: 1; min-height: 0; width: 100%; }
+#flow-svg { flex: 1; min-height: 320px; width: 100%; }
+#flow-detail {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.03);
+  padding: 0.8rem;
+  font-size: 0.78rem;
+  color: var(--color-muted);
+}
+#flow-detail strong { color: var(--color-text); display: block; margin-bottom: 0.35rem; }
+#flow-detail code { color: var(--color-text); background: rgba(255,255,255,0.06); padding: 2px 5px; border-radius: 6px; }
 
 /* Footer */
 #stats-bar { height: 32px; display: flex; align-items: center; padding: 0 1.25rem; border-top: 1px solid var(--color-border); background: var(--color-surface); font-size: 0.78rem; color: var(--color-muted); flex-shrink: 0; }
@@ -93,6 +103,15 @@ body { font-family: system-ui, -apple-system, sans-serif; background: var(--colo
 
 /* Empty state */
 .empty-state { color: var(--color-muted); font-size: 0.85rem; padding: 2rem; text-align: center; }
+
+@media (max-width: 1100px) {
+  #layout { grid-template-columns: 220px 1fr; }
+  #right-panel { border-left: 0; border-top: 1px solid var(--color-border); }
+}
+
+@media (max-width: 900px) {
+  #layout { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
@@ -111,8 +130,11 @@ body { font-family: system-ui, -apple-system, sans-serif; background: var(--colo
   </nav>
   <main id="main-panel"></main>
   <aside id="right-panel">
-    <h3>Change Flow</h3>
-    <svg id="flow-svg"></svg>
+    <div>
+      <h3>Change Flow</h3>
+      <svg id="flow-svg"></svg>
+    </div>
+    <div id="flow-detail"><strong>Flow details</strong>Hover or click a node or connection to inspect the full path and change information.</div>
   </aside>
 </div>
 <footer id="stats-bar"><span id="stats-summary"></span></footer>"#;
@@ -348,26 +370,63 @@ const HTML_SCRIPT: &str = r##"<script>
       }[kind] || '#94a3b8';
     }
 
+    function setFlowDetail(title, lines) {
+      var detail = document.getElementById('flow-detail');
+      detail.innerHTML = '<strong>' + escHtml(title) + '</strong>' + lines.map(function(line) {
+        return '<div>' + line + '</div>';
+      }).join('');
+    }
+
     var srcX = 4;
     var dstX = W - BAR_W - 4;
 
     srcFiles.forEach(function(f) {
       var cy = srcPos[f];
-      svg.appendChild(el('rect', { x: srcX, y: cy - BAR_H/2, width: BAR_W, height: BAR_H, rx: 3,
-        fill: '#1e293b', stroke: '#334155', 'stroke-width': 1 }));
+      var rect = el('rect', { x: srcX, y: cy - BAR_H/2, width: BAR_W, height: BAR_H, rx: 3,
+        fill: '#1e293b', stroke: '#334155', 'stroke-width': 1 }, f);
+      rect.style.cursor = 'pointer';
+      rect.addEventListener('mouseenter', function() {
+        setFlowDetail('Source file', ['<code>' + escHtml(f) + '</code>']);
+      });
+      rect.addEventListener('click', function() {
+        setFlowDetail('Source file', ['<code>' + escHtml(f) + '</code>']);
+      });
+      svg.appendChild(rect);
       var t = el('text', { x: srcX + 5, y: cy + 4,
-        fill: '#94a3b8', 'font-size': 10, 'font-family': 'system-ui,sans-serif' });
-      t.textContent = shortPath(f);
+        fill: '#94a3b8', 'font-size': 10, 'font-family': 'system-ui,sans-serif' }, f);
+      t.textContent = shortPath(f, 28);
+      t.style.cursor = 'pointer';
+      t.addEventListener('mouseenter', function() {
+        setFlowDetail('Source file', ['<code>' + escHtml(f) + '</code>']);
+      });
+      t.addEventListener('click', function() {
+        setFlowDetail('Source file', ['<code>' + escHtml(f) + '</code>']);
+      });
       svg.appendChild(t);
     });
 
     dstFiles.forEach(function(f) {
       var cy = dstPos[f];
-      svg.appendChild(el('rect', { x: dstX, y: cy - BAR_H/2, width: BAR_W, height: BAR_H, rx: 3,
-        fill: '#1e293b', stroke: '#334155', 'stroke-width': 1 }));
+      var rect = el('rect', { x: dstX, y: cy - BAR_H/2, width: BAR_W, height: BAR_H, rx: 3,
+        fill: '#1e293b', stroke: '#334155', 'stroke-width': 1 }, f);
+      rect.style.cursor = 'pointer';
+      rect.addEventListener('mouseenter', function() {
+        setFlowDetail('Target file', ['<code>' + escHtml(f) + '</code>']);
+      });
+      rect.addEventListener('click', function() {
+        setFlowDetail('Target file', ['<code>' + escHtml(f) + '</code>']);
+      });
+      svg.appendChild(rect);
       var t = el('text', { x: dstX + 5, y: cy + 4,
-        fill: '#94a3b8', 'font-size': 10, 'font-family': 'system-ui,sans-serif' });
-      t.textContent = shortPath(f);
+        fill: '#94a3b8', 'font-size': 10, 'font-family': 'system-ui,sans-serif' }, f);
+      t.textContent = shortPath(f, 28);
+      t.style.cursor = 'pointer';
+      t.addEventListener('mouseenter', function() {
+        setFlowDetail('Target file', ['<code>' + escHtml(f) + '</code>']);
+      });
+      t.addEventListener('click', function() {
+        setFlowDetail('Target file', ['<code>' + escHtml(f) + '</code>']);
+      });
       svg.appendChild(t);
     });
 
@@ -380,15 +439,24 @@ const HTML_SCRIPT: &str = r##"<script>
       var path = el('path', {
         d: 'M' + x1 + ',' + y1 + ' C' + cx + ',' + y1 + ' ' + cx + ',' + y2 + ' ' + x2 + ',' + y2,
         fill: 'none', stroke: strokeForKind(flow.kind), 'stroke-width': flow.kind === 'modified' ? 2 : 1.5, opacity: 0.72
-      }, flow.kind + ': ' + flow.name + ' (' + shortPath(flow.source) + ' → ' + shortPath(flow.target) + ')');
+      }, flow.kind + ': ' + flow.name + ' (' + shortPath(flow.source, 18) + ' → ' + shortPath(flow.target, 18) + ')');
+      path.style.cursor = 'pointer';
+      function showFlow() {
+        setFlowDetail(capitalize(flow.kind) + ': ' + flow.name, [
+          'From <code>' + escHtml(flow.source) + '</code>',
+          'To <code>' + escHtml(flow.target) + '</code>'
+        ]);
+      }
       path.addEventListener('mouseenter', function() {
         path.setAttribute('stroke-width', 3);
         path.setAttribute('opacity', 1);
+        showFlow();
       });
       path.addEventListener('mouseleave', function() {
         path.setAttribute('stroke-width', flow.kind === 'modified' ? 2 : 1.5);
         path.setAttribute('opacity', 0.72);
       });
+      path.addEventListener('click', showFlow);
       svg.appendChild(path);
     });
   }
@@ -409,10 +477,14 @@ const HTML_SCRIPT: &str = r##"<script>
     return counts;
   }
   function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
-  function shortPath(p) {
+  function shortPath(p, maxLen) {
     if (!p) return '';
     var parts = p.replace(/\\/g, '/').split('/');
-    return parts.length <= 2 ? p : parts.slice(-2).join('/');
+    var value = parts.length <= 2 ? p : parts.slice(-2).join('/');
+    if (maxLen && value.length > maxLen) {
+      return value.slice(0, Math.max(0, maxLen - 1)) + '…';
+    }
+    return value;
   }
   function escHtml(s) {
     if (!s) return '';
