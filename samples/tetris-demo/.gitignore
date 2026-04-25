@@ -1,0 +1,5 @@
+frontend/node_modules/
+backend/TetrisDemo.Api/bin/
+backend/TetrisDemo.Api/obj/
+backend/TetrisDemo.Api/App_Data/
+backend/TetrisDemo.Api/wwwroot/assets/

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Structix Demo — Tetris Clone</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <section class="game-column panel">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">TypeScript frontend + C# backend + SQLite</p>
+          <h1>Structix Demo: Tetris</h1>
+        </div>
+        <button id="start-button" class="primary-button">Start / Restart</button>
+      </div>
+      <div class="game-layout">
+        <canvas id="game-canvas" width="300" height="600" aria-label="Tetris board"></canvas>
+        <aside class="sidebar">
+          <div class="stat-card">
+            <span>Score</span>
+            <strong id="score-value">0</strong>
+          </div>
+          <div class="stat-card">
+            <span>Lines</span>
+            <strong id="lines-value">0</strong>
+          </div>
+          <div class="stat-card">
+            <span>Level</span>
+            <strong id="level-value">1</strong>
+          </div>
+          <div class="stat-card next-piece-card">
+            <span>Next</span>
+            <canvas id="next-piece-canvas" width="120" height="120"></canvas>
+          </div>
+          <div class="controls-card">
+            <h2>Controls</h2>
+            <ul>
+              <li>← / → Move</li>
+              <li>↑ Rotate</li>
+              <li>↓ Soft drop</li>
+              <li>Space Hard drop</li>
+              <li>P Pause</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+      <div id="game-message" class="message-banner">Press start to play.</div>
+    </section>
+
+    <section class="scores-column panel">
+      <div class="panel-head compact">
+        <div>
+          <p class="eyebrow">Persistent backend demo</p>
+          <h2>Local High Scores</h2>
+        </div>
+      </div>
+
+      <form id="score-form" class="score-form hidden">
+        <label>
+          Name
+          <input id="player-name" type="text" maxlength="24" placeholder="Your initials" />
+        </label>
+        <button type="submit" class="primary-button">Save score</button>
+      </form>
+
+      <p id="score-form-message" class="form-message"></p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Player</th>
+              <th>Score</th>
+              <th>Lines</th>
+              <th>Level</th>
+            </tr>
+          </thead>
+          <tbody id="highscore-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/assets/main.js"></script>
+</body>
+</html>
