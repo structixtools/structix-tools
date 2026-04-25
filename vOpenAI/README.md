@@ -6,12 +6,15 @@ Analyze C# and TypeScript diffs, detect clone drift, and produce grounded explan
 
 Build the CLI, then run it against a repo:
 
+You can optionally repeat `--path <repo-relative-path>` to limit analysis to specific areas of a monorepo.
+
 ### Linux / WSL
 
 ```bash
 source "$HOME/.cargo/env"   # or /root/.cargo/env if building as root
 cargo build --release -p analyzer-cli
 ./target/release/analyzer-cli --repo /path/to/repo --base main --head HEAD --format html > report.html
+./target/release/analyzer-cli --repo /path/to/repo --base main --head HEAD --path samples/tetris-demo --format html > report.html
 ```
 
 ### Windows
@@ -237,7 +240,7 @@ tar -xzf analyzer-cli-linux-x86_64.tar.gz
 ## Distribution Notes
 
 - The tool is a single CLI binary; no service or database is required.
-- The CLI accepts repo paths and git refs only.
+- The CLI accepts repo paths and git refs, plus optional repeatable `--path` filters for monorepo scoping.
 - `pr-comment` output is meant to be pasted into a PR comment.
 - Generated and vendor code is ignored by default.
 

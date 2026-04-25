@@ -44,6 +44,9 @@ pub enum Commands {
         /// Save output to file (default: timestamped filename, applies to --prompt, --json, --html)
         #[arg(long, short = 'o')]
         output: Option<String>,
+        /// Restrict analysis to one or more repo-relative paths
+        #[arg(long = "path")]
+        paths: Vec<String>,
     },
     /// Detect duplicate code in the repository working tree
     Duplicates {
@@ -59,6 +62,9 @@ pub enum Commands {
         /// Save output to file (default: timestamped filename, applies to --prompt)
         #[arg(long, short = 'o')]
         output: Option<String>,
+        /// Restrict analysis to one or more repo-relative paths
+        #[arg(long = "path")]
+        paths: Vec<String>,
     },
 }
 
@@ -76,9 +82,9 @@ fn extract_all(files: &HashMap<String, String>) -> Vec<CodeEntity> {
     entities
 }
 
-fn walk_dir(root: &str) -> Vec<(String, String)> {
+fn walk_dir(root: &str, path_filters: &[String]) -> Vec<(String, String)> {
     let mut results = Vec::new();
-    fn recurse(dir: &str, results: &mut Vec<(String, String)>) {
+    fn recurse(dir: &str, root: &std::path::Path, path_filters: &[String], results: &mut Vec<(String, String)>) {
         let Ok(entries) = std::fs::read_dir(dir) else { return };
         for entry in entries.flatten() {
             let path = entry.path();
@@ -87,26 +93,31 @@ fn walk_dir(root: &str) -> Vec<(String, String)> {
                 continue;
             }
             if path.is_dir() {
-                recurse(path.to_str().unwrap_or(""), results);
+                recurse(path.to_str().unwrap_or(""), root, path_filters, results);
             } else if let Some(s) = path.to_str() {
                 if s.ends_with(".ts") || s.ends_with(".tsx") || s.ends_with(".cs") {
+                    let relative = path.strip_prefix(root).ok().and_then(|p| p.to_str()).unwrap_or(s).replace('\\', "/");
+                    if !crate::git_reader::path_matches_filters(&relative, path_filters) {
+                        continue;
+                    }
                     if let Ok(content) = std::fs::read_to_string(s) {
-                        results.push((s.to_string(), content));
+                        results.push((relative, content));
                     }
                 }
             }
         }
     }
-    recurse(root, &mut results);
+    let root_path = std::path::Path::new(root);
+    recurse(root, root_path, path_filters, &mut results);
     results
 }
 
 pub fn run() -> anyhow::Result<()> {
     let cli = Cli::parse();
     match cli.command {
-        Commands::Diff { repo_path, from, to, explain, json, prompt, html, output } => {
-            let before_files = get_files_at_ref(&repo_path, &from)?;
-            let after_files = get_files_at_ref(&repo_path, &to)?;
+        Commands::Diff { repo_path, from, to, explain, json, prompt, html, output, paths } => {
+            let before_files = get_files_at_ref(&repo_path, &from, &paths)?;
+            let after_files = get_files_at_ref(&repo_path, &to, &paths)?;
             let before = extract_all(&before_files);
             let after = extract_all(&after_files);
             let changes = diff_entities(&before, &after);
@@ -179,8 +190,8 @@ pub fn run() -> anyhow::Result<()> {
             }
         }
 
-        Commands::Duplicates { repo_path, explain, prompt, output } => {
-            let file_pairs = walk_dir(&repo_path);
+        Commands::Duplicates { repo_path, explain, prompt, output, paths } => {
+            let file_pairs = walk_dir(&repo_path, &paths);
             let files: HashMap<String, String> = file_pairs.into_iter().collect();
             let entities = extract_all(&files);
 

@@ -39,7 +39,7 @@ export function greet(name: string): string {
     git(&repo, ["add", "src/app.ts"]);
     git(&repo, ["commit", "-m", "update app"]);
 
-    let report = analyze_repo(&repo, "HEAD~1", "HEAD").expect("analysis should succeed");
+    let report = analyze_repo(&repo, "HEAD~1", "HEAD", &[]).expect("analysis should succeed");
 
     assert!(report.summary.contains("1 modified file"));
     assert!(report.summary.contains("1 exact clone group"));
@@ -81,7 +81,7 @@ export function greet(name: string): string {
     git(&repo, ["add", "src/a.ts"]);
     git(&repo, ["commit", "-m", "update a"]);
 
-    let report = analyze_repo(&repo, "HEAD~1", "HEAD").expect("analysis should succeed");
+    let report = analyze_repo(&repo, "HEAD~1", "HEAD", &[]).expect("analysis should succeed");
 
     assert!(report.summary.contains("clone drift group"));
     assert!(report.markdown().contains("Clone drift detected"));
@@ -124,13 +124,37 @@ export function greet(name: string): string {
     git(&repo, ["add", "src/app.ts"]);
     git(&repo, ["commit", "-m", "update ts"]);
 
-    let report = analyze_repo(&repo, "HEAD~1", "HEAD").expect("analysis should succeed");
+    let report = analyze_repo(&repo, "HEAD~1", "HEAD", &[]).expect("analysis should succeed");
 
     assert!(report.summary.contains("1 modified file"));
     assert!(report
         .findings
         .iter()
         .any(|finding| finding.code == "file.modified"));
+}
+
+#[test]
+fn path_filters_limit_analysis_scope() {
+    let repo = create_repo();
+    fs::create_dir_all(repo.join("samples/demo")).expect("create sample directory");
+    fs::create_dir_all(repo.join("site")).expect("create site directory");
+
+    write_file(&repo.join("samples/demo/app.ts"), "export function demo(): string { return 'a'; }");
+    write_file(&repo.join("site/index.ts"), "export function site(): string { return 'a'; }");
+    git(&repo, ["add", "."]);
+    git(&repo, ["commit", "-m", "base"]);
+
+    write_file(&repo.join("samples/demo/app.ts"), "export function demo(): string { return 'b'; }");
+    write_file(&repo.join("site/index.ts"), "export function site(): string { return 'b'; }");
+    git(&repo, ["add", "."]);
+    git(&repo, ["commit", "-m", "head"]);
+
+    let filters = vec!["samples/demo".to_string()];
+    let report = analyze_repo(&repo, "HEAD~1", "HEAD", &filters).expect("filtered analysis should succeed");
+
+    let markdown = report.markdown();
+    assert!(markdown.contains("samples/demo/app.ts"));
+    assert!(!markdown.contains("site/index.ts"));
 }
 
 fn create_repo() -> PathBuf {

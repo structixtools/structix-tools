@@ -3,6 +3,7 @@ use std::collections::BTreeSet;
 use std::path::Path;
 
 use crate::detectors::clone::detect_clone_drifts;
+use crate::input::filter::path_matches_filters;
 use crate::input::git::{changed_files, read_file, tracked_files, GitError};
 use crate::input::snapshot::ChangeKind;
 use crate::ir::file::FileAnalysis;
@@ -45,6 +46,7 @@ pub fn analyze_repo(
     repo: impl AsRef<Path>,
     base_ref: &str,
     head_ref: &str,
+    path_filters: &[String],
 ) -> Result<Report, AnalysisError> {
     let repo = repo.as_ref();
     let changes = changed_files(repo, base_ref, head_ref)?;
@@ -56,6 +58,18 @@ pub fn analyze_repo(
     let mut renames = Vec::new();
 
     for change in changes {
+        let included = match &change.kind {
+            ChangeKind::Renamed { from } | ChangeKind::Copied { from } => {
+                path_matches_filters(&change.path, path_filters)
+                    || path_matches_filters(from, path_filters)
+            }
+            _ => path_matches_filters(&change.path, path_filters),
+        };
+
+        if !included {
+            continue;
+        }
+
         match change.kind {
             ChangeKind::Added | ChangeKind::Copied { .. } => {
                 if let Some(head_file) = load_revision_analysis(repo, head_ref, &change.path)? {
@@ -94,7 +108,7 @@ pub fn analyze_repo(
     }
 
     for path in tracked_files(repo, base_ref)? {
-        if seen_base_paths.contains(&path) {
+        if seen_base_paths.contains(&path) || !path_matches_filters(&path, path_filters) {
             continue;
         }
 
@@ -104,7 +118,7 @@ pub fn analyze_repo(
     }
 
     for path in tracked_files(repo, head_ref)? {
-        if seen_head_paths.contains(&path) {
+        if seen_head_paths.contains(&path) || !path_matches_filters(&path, path_filters) {
             continue;
         }
 

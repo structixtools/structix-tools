@@ -41,6 +41,7 @@ where
     let mut base = None;
     let mut head = None;
     let mut format = OutputFormat::Markdown;
+    let mut paths = Vec::new();
 
     let mut iter = args.into_iter();
     while let Some(arg) = iter.next() {
@@ -49,6 +50,7 @@ where
             "--base" => base = Some(next_value(&mut iter, "--base")?),
             "--head" => head = Some(next_value(&mut iter, "--head")?),
             "--format" => format = parse_format(&mut iter)?,
+            "--path" => paths.push(next_value(&mut iter, "--path")?),
             "-h" | "--help" => {
                 return Ok(help_text());
             }
@@ -60,7 +62,7 @@ where
     let base = base.ok_or_else(|| CliError::new("missing --base"))?;
     let head = head.ok_or_else(|| CliError::new("missing --head"))?;
 
-    let report = analyze_repo(PathBuf::from(repo), &base, &head)
+    let report = analyze_repo(PathBuf::from(repo), &base, &head, &paths)
         .map_err(|err| CliError::new(err.to_string()))?;
 
     render_report(&report, format)
@@ -78,7 +80,7 @@ where
 
 fn help_text() -> String {
     [
-        "analyzer-cli --repo <path> --base <ref> --head <ref> [--format markdown|json|pr-comment|html]",
+        "analyzer-cli --repo <path> --base <ref> --head <ref> [--format markdown|json|pr-comment|html] [--path <repo-relative-path>]...",
         "",
         "Prints a report for the diff between two git refs.",
     ]

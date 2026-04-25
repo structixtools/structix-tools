@@ -31,6 +31,7 @@ structix diff [REPO_PATH] [OPTIONS]
 | `--html` | — | Output a self-contained interactive HTML report (open in browser) |
 | `--explain` | — | Call Claude API to narrate changes (requires `ANTHROPIC_API_KEY`) |
 | `-o, --output <FILE>` | timestamped | Custom output filename for `--json` / `--prompt` / `--html` |
+| `--path <PATH>` | — | Restrict analysis to one or more repo-relative paths; can be repeated |
 
 **Examples:**
 
@@ -40,6 +41,9 @@ structix diff
 
 # Compare specific refs
 structix diff /path/to/repo --from main --to feature-branch
+
+# Compare only a sample app inside a monorepo
+structix diff /path/to/repo --from main --to HEAD --path samples/tetris-demo
 
 # Save JSON manifest (writes structix-2026-03-26T14-22-05.json)
 structix diff --json
@@ -95,6 +99,7 @@ structix duplicates [REPO_PATH] [OPTIONS]
 | `--prompt` | — | Output a ready-to-paste Claude chat prompt (saved to file) |
 | `--explain` | — | Call Claude API for refactoring advice (requires `ANTHROPIC_API_KEY`) |
 | `-o, --output <FILE>` | timestamped | Custom output filename for `--prompt` |
+| `--path <PATH>` | — | Restrict analysis to one or more repo-relative paths; can be repeated |
 
 **Examples:**
 
@@ -104,6 +109,9 @@ structix duplicates
 
 # Scan a specific path
 structix duplicates /path/to/repo
+
+# Scan only a subdirectory inside a repo
+structix duplicates /path/to/repo --path samples/tetris-demo
 
 # Save a Claude chat prompt with clone details
 structix duplicates --prompt

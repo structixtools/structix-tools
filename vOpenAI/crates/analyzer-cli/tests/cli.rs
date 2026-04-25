@@ -144,6 +144,38 @@ export function greet(name: string): string {
 }
 
 #[test]
+fn path_filters_limit_cli_analysis_scope() {
+    let repo = create_repo();
+    fs::create_dir_all(repo.join("samples/demo")).expect("create sample directory");
+    fs::create_dir_all(repo.join("site")).expect("create site directory");
+
+    write_file(&repo.join("samples/demo/app.ts"), "export function demo(): string { return 'a'; }");
+    write_file(&repo.join("site/index.ts"), "export function site(): string { return 'a'; }");
+    git(&repo, ["add", "."]);
+    git(&repo, ["commit", "-m", "base"]);
+
+    write_file(&repo.join("samples/demo/app.ts"), "export function demo(): string { return 'b'; }");
+    write_file(&repo.join("site/index.ts"), "export function site(): string { return 'b'; }");
+    git(&repo, ["add", "."]);
+    git(&repo, ["commit", "-m", "head"]);
+
+    let output = run([
+        "--repo",
+        repo.to_str().expect("repo path should be UTF-8"),
+        "--base",
+        "HEAD~1",
+        "--head",
+        "HEAD",
+        "--path",
+        "samples/demo",
+    ])
+    .expect("cli run should succeed");
+
+    assert!(output.contains("samples/demo/app.ts"));
+    assert!(!output.contains("site/index.ts"));
+}
+
+#[test]
 fn renders_html_report_for_a_repo() {
     let repo = create_repo();
 

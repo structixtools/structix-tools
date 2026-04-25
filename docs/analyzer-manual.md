@@ -55,6 +55,10 @@ cargo run -p analyzer-cli -- \
 - `--base <ref>`
 - `--head <ref>`
 
+Optional:
+
+- `--path <repo-relative-path>` to restrict analysis to one or more parts of a monorepo; repeat the flag as needed
+
 ## Output formats
 
 - `markdown`
@@ -107,6 +111,7 @@ Use for human-readable reports in local review.
 
 ```bash
 cargo run -p analyzer-cli -- --repo . --base main --head HEAD --format markdown
+cargo run -p analyzer-cli -- --repo . --base main --head HEAD --path samples/tetris-demo --format markdown
 ```
 
 ### JSON
@@ -128,6 +133,7 @@ Use for a richer browser-based report.
 
 ```bash
 cargo run -p analyzer-cli -- --repo . --base main --head HEAD --format html > report.html
+cargo run -p analyzer-cli -- --repo . --base main --head HEAD --path samples/tetris-demo --format html > report.html
 ```
 
 ---

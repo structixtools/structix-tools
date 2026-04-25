@@ -7,6 +7,7 @@ const SUPPORTED_EXTENSIONS: &[&str] = &[".ts", ".tsx", ".cs"];
 pub fn get_files_at_ref(
     repo_path: &str,
     ref_name: &str,
+    path_filters: &[String],
 ) -> anyhow::Result<HashMap<String, String>> {
     // List all files at ref
     let ls = Command::new("git")
@@ -28,6 +29,9 @@ pub fn get_files_at_ref(
         if !SUPPORTED_EXTENSIONS.iter().any(|ext| path.ends_with(ext)) {
             continue;
         }
+        if !path_matches_filters(path, path_filters) {
+            continue;
+        }
         let show = Command::new("git")
             .args(["show", &format!("{}:{}", ref_name, path)])
             .current_dir(repo_path)
@@ -41,4 +45,27 @@ pub fn get_files_at_ref(
     }
 
     Ok(files)
+}
+
+pub fn path_matches_filters(path: &str, filters: &[String]) -> bool {
+    if filters.is_empty() {
+        return true;
+    }
+
+    let normalized_path = normalize_path(path);
+    filters.iter().any(|filter| {
+        let normalized_filter = normalize_path(filter);
+        normalized_path == normalized_filter
+            || normalized_path
+                .strip_prefix(&normalized_filter)
+                .is_some_and(|rest| rest.starts_with('/'))
+    })
+}
+
+fn normalize_path(path: &str) -> String {
+    let mut normalized = path.replace('\\', "/");
+    while let Some(stripped) = normalized.strip_prefix("./") {
+        normalized = stripped.to_string();
+    }
+    normalized.trim_matches('/').to_string()
 }
