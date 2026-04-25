@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Structix Manual</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <main class="section">
+    <div class="container doc-page">
+      <a class="button secondary" href="../index.html">← Back to home</a>
+      <h1>Structix Manual</h1>
+      <p class="lead">Structix is a Rust CLI for structural code analysis of TypeScript and C# repositories.</p>
+
+      <div class="card">
+        <h2>What Structix does</h2>
+        <p>Structix focuses on two workflows: structural diffing between two git refs, and duplicate detection in the current working tree.</p>
+        <p>Unlike line-based diffs, Structix compares entities such as functions, methods, classes, interfaces, constructors, enums, and properties.</p>
+      </div>
+
+      <div class="card">
+        <h2>Installation</h2>
+<pre><code>cd vAnthropic
+cargo build --release</code></pre>
+        <ul>
+          <li>Linux / WSL: <code>target/release/structix</code></li>
+          <li>Windows: <code>target/release/structix.exe</code></li>
+          <li>Requires <code>git</code> on PATH</li>
+          <li><code>ANTHROPIC_API_KEY</code> only needed for <code>--explain</code></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Command overview</h2>
+<pre><code>structix diff [REPO_PATH] [OPTIONS]
+structix duplicates [REPO_PATH] [OPTIONS]</code></pre>
+      </div>
+
+      <div class="card">
+        <h2>Structural diff</h2>
+<pre><code>structix diff . --from HEAD~1 --to HEAD
+structix diff /path/to/repo --from main --to feature-branch --html -o report.html</code></pre>
+        <p>Useful flags:</p>
+        <ul>
+          <li><code>--from &lt;REF&gt;</code></li>
+          <li><code>--to &lt;REF&gt;</code></li>
+          <li><code>--json</code></li>
+          <li><code>--prompt</code></li>
+          <li><code>--html</code></li>
+          <li><code>--explain</code></li>
+          <li><code>-o, --output &lt;FILE&gt;</code></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Duplicate detection</h2>
+<pre><code>structix duplicates .
+structix duplicates /path/to/repo --prompt -o dedup-review.md</code></pre>
+        <p>Duplicate categories:</p>
+        <ul>
+          <li><strong>Exact clones</strong>: same normalized source</li>
+          <li><strong>Structural clones</strong>: same AST shape even if names differ</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Typical workflows</h2>
+<pre><code>structix diff . --from HEAD~1 --to HEAD
+structix diff . --from main --to HEAD --html -o structix-report.html
+ANTHROPIC_API_KEY=... structix diff . --from main --to HEAD --explain
+structix duplicates .</code></pre>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
