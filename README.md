@@ -77,13 +77,13 @@ If you want this as a public open-source repo, a good setup would be:
 - Actions workflow for building:
   - Windows x86_64
   - Linux x86_64
-  - macOS Apple Silicon / Intel
+  - macOS Apple Silicon
 
 ## Next Good Steps
 
 Completed in this repo:
 
-1. ✅ GitHub Actions release builds are configured in [`.github/workflows/release.yml`](./.github/workflows/release.yml), including Windows, Linux, macOS Intel, and macOS Apple Silicon assets plus SHA256 files.
+1. ✅ GitHub Actions release builds are configured in [`.github/workflows/release.yml`](./.github/workflows/release.yml), including Windows, Linux, and macOS Apple Silicon assets plus SHA256 files.
 2. ✅ The landing page now includes versioned release download links and release-link templates in [`site/index.html`](./site/index.html).
 3. ✅ GitHub Pages deployment is configured in [`.github/workflows/pages.yml`](./.github/workflows/pages.yml).
 4. ✅ Example outputs are now linked from the landing page in [`site/examples/`](./site/examples/).

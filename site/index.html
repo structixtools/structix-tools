@@ -147,7 +147,6 @@ $ analyzer-cli --repo . --base main --head HEAD --format pr-comment
             <div class="download-table">
               <div><strong>Windows</strong><span>Binary target: <code>structix-windows-x86_64.exe</code></span></div>
               <div><strong>Linux / WSL</strong><span>Binary target: <code>structix-linux-x86_64</code></span></div>
-              <div><strong>macOS Intel</strong><span>Binary target: <code>structix-macos-x86_64</code></span></div>
               <div><strong>macOS Apple Silicon</strong><span>Binary target: <code>structix-macos-arm64</code></span></div>
             </div>
             <div class="cta-row release-links" data-tool="structix"></div>
@@ -163,7 +162,6 @@ cargo build --release</code></pre>
             <div class="download-table">
               <div><strong>Windows</strong><span>Binary target: <code>analyzer-cli-windows-x86_64.exe</code></span></div>
               <div><strong>Linux / WSL</strong><span>Binary target: <code>analyzer-cli-linux-x86_64</code></span></div>
-              <div><strong>macOS Intel</strong><span>Binary target: <code>analyzer-cli-macos-x86_64</code></span></div>
               <div><strong>macOS Apple Silicon</strong><span>Binary target: <code>analyzer-cli-macos-arm64</code></span></div>
             </div>
             <div class="cta-row release-links" data-tool="analyzer-cli"></div>
@@ -303,13 +301,11 @@ Detected 4 added files, 4 modified files, 1 removed file, 4 renamed files, 42 sy
         'structix': [
           ['Windows', 'structix-windows-x86_64.exe'],
           ['Linux', 'structix-linux-x86_64'],
-          ['macOS Intel', 'structix-macos-x86_64'],
           ['macOS ARM', 'structix-macos-arm64']
         ],
         'analyzer-cli': [
           ['Windows', 'analyzer-cli-windows-x86_64.exe'],
           ['Linux', 'analyzer-cli-linux-x86_64'],
-          ['macOS Intel', 'analyzer-cli-macos-x86_64'],
           ['macOS ARM', 'analyzer-cli-macos-arm64']
         ]
       };

@@ -25,10 +25,6 @@ jobs:
             label: windows-x86_64
             bin: structix.exe
             asset: structix-windows-x86_64.exe
-          - os: macos-13
-            label: macos-x86_64
-            bin: structix
-            asset: structix-macos-x86_64
           - os: macos-14
             label: macos-arm64
             bin: structix
@@ -78,10 +74,6 @@ jobs:
             label: windows-x86_64
             bin: analyzer-cli.exe
             asset: analyzer-cli-windows-x86_64.exe
-          - os: macos-13
-            label: macos-x86_64
-            bin: analyzer-cli
-            asset: analyzer-cli-macos-x86_64
           - os: macos-14
             label: macos-arm64
             bin: analyzer-cli
