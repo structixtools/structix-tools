@@ -35,10 +35,29 @@ body { font-family: system-ui, -apple-system, sans-serif; background: var(--colo
 .pill-renamed  { background: rgba(168,85,247,0.15);  color: var(--color-renamed); }
 
 /* Layout */
-#layout { display: grid; grid-template-columns: 220px 1fr 360px; flex: 1; min-height: 0; }
-#sidebar { overflow-y: auto; border-right: 1px solid var(--color-border); padding: 0.6rem; }
-#main-panel { overflow-y: auto; padding: 1rem; }
-#right-panel { overflow-y: auto; border-left: 1px solid var(--color-border); padding: 0.75rem; display: flex; flex-direction: column; gap: 0.75rem; }
+#layout { display: flex; flex: 1; min-height: 0; }
+#sidebar {
+  width: 220px;
+  min-width: 170px;
+  max-width: 40vw;
+  overflow: auto;
+  resize: horizontal;
+  border-right: 1px solid var(--color-border);
+  padding: 0.6rem;
+}
+#main-panel { flex: 1; min-width: 280px; overflow-y: auto; padding: 1rem; }
+#right-panel {
+  width: 420px;
+  min-width: 300px;
+  max-width: 55vw;
+  overflow: auto;
+  resize: horizontal;
+  border-left: 1px solid var(--color-border);
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
 #right-panel h3 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-muted); margin-bottom: 0.5rem; flex-shrink: 0; }
 #flow-svg { flex: 1; min-height: 320px; width: 100%; }
 #flow-detail {
@@ -105,12 +124,13 @@ body { font-family: system-ui, -apple-system, sans-serif; background: var(--colo
 .empty-state { color: var(--color-muted); font-size: 0.85rem; padding: 2rem; text-align: center; }
 
 @media (max-width: 1100px) {
-  #layout { grid-template-columns: 220px 1fr; }
+  #layout { flex-direction: column; }
+  #sidebar, #right-panel {
+    width: auto;
+    max-width: none;
+    resize: none;
+  }
   #right-panel { border-left: 0; border-top: 1px solid var(--color-border); }
-}
-
-@media (max-width: 900px) {
-  #layout { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -328,10 +348,10 @@ const HTML_SCRIPT: &str = r##"<script>
       return;
     }
 
-    var W = svg.clientWidth || 240;
-    var BAR_H = 22;
-    var GAP = 8;
-    var BAR_W = Math.min(100, Math.floor((W - 40) / 2));
+    var W = svg.clientWidth || 360;
+    var BAR_H = 34;
+    var GAP = 10;
+    var BAR_W = Math.max(120, Math.min(165, Math.floor((W - 56) / 2)));
 
     var srcFiles = unique(flows.map(function(c) { return c.source; }));
     var dstFiles = unique(flows.map(function(c) { return c.target; }));
@@ -340,6 +360,18 @@ const HTML_SCRIPT: &str = r##"<script>
     var dstPos = {};
     srcFiles.forEach(function(f, i) { srcPos[f] = 40 + i * (BAR_H + GAP) + BAR_H / 2; });
     dstFiles.forEach(function(f, i) { dstPos[f] = 40 + i * (BAR_H + GAP) + BAR_H / 2; });
+
+    function wrapLabel(value, maxLineLength) {
+      var normalized = shortPath(value, 64);
+      if (normalized.length <= maxLineLength) return [normalized];
+      var parts = normalized.split('/');
+      if (parts.length > 1) {
+        var first = parts.slice(0, -1).join('/');
+        var second = parts[parts.length - 1];
+        return [truncate(first, maxLineLength), truncate(second, maxLineLength)];
+      }
+      return [truncate(normalized.slice(0, Math.ceil(normalized.length / 2)), maxLineLength), truncate(normalized.slice(Math.ceil(normalized.length / 2)), maxLineLength)];
+    }
 
     var totalH = Math.max(
       srcFiles.length * (BAR_H + GAP) + 50,
@@ -392,9 +424,13 @@ const HTML_SCRIPT: &str = r##"<script>
         setFlowDetail('Source file', ['<code>' + escHtml(f) + '</code>']);
       });
       svg.appendChild(rect);
-      var t = el('text', { x: srcX + 5, y: cy + 4,
+      var t = el('text', { x: srcX + 6, y: cy - 3,
         fill: '#94a3b8', 'font-size': 10, 'font-family': 'system-ui,sans-serif' }, f);
-      t.textContent = shortPath(f, 28);
+      wrapLabel(f, 22).forEach(function(line, index) {
+        var span = el('tspan', { x: srcX + 6, y: cy - 3 + index * 11 });
+        span.textContent = line;
+        t.appendChild(span);
+      });
       t.style.cursor = 'pointer';
       t.addEventListener('mouseenter', function() {
         setFlowDetail('Source file', ['<code>' + escHtml(f) + '</code>']);
@@ -417,9 +453,13 @@ const HTML_SCRIPT: &str = r##"<script>
         setFlowDetail('Target file', ['<code>' + escHtml(f) + '</code>']);
       });
       svg.appendChild(rect);
-      var t = el('text', { x: dstX + 5, y: cy + 4,
+      var t = el('text', { x: dstX + 6, y: cy - 3,
         fill: '#94a3b8', 'font-size': 10, 'font-family': 'system-ui,sans-serif' }, f);
-      t.textContent = shortPath(f, 28);
+      wrapLabel(f, 22).forEach(function(line, index) {
+        var span = el('tspan', { x: dstX + 6, y: cy - 3 + index * 11 });
+        span.textContent = line;
+        t.appendChild(span);
+      });
       t.style.cursor = 'pointer';
       t.addEventListener('mouseenter', function() {
         setFlowDetail('Target file', ['<code>' + escHtml(f) + '</code>']);
@@ -485,6 +525,10 @@ const HTML_SCRIPT: &str = r##"<script>
       return value.slice(0, Math.max(0, maxLen - 1)) + '…';
     }
     return value;
+  }
+  function truncate(value, maxLen) {
+    if (!maxLen || value.length <= maxLen) return value;
+    return value.slice(0, Math.max(0, maxLen - 1)) + '…';
   }
   function escHtml(s) {
     if (!s) return '';
