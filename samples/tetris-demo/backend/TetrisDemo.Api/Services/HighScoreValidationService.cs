@@ -1,10 +1,10 @@
-using TetrisDemo.Api.Models;
+using TetrisDemo.Api.Models.Requests;
 
 namespace TetrisDemo.Api.Services;
 
-public static class ScoreValidator
+public static class HighScoreValidationService
 {
-    public static bool IsPlausible(SubmitHighScoreRequest request)
+    public static bool HasConsistentProgression(RecordHighScoreRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.PlayerName))
         {

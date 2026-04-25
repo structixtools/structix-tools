@@ -110,7 +110,8 @@ h1, h2 { margin: 0; }
 .primary-button:hover { filter: brightness(1.06); }
 
 .message-banner,
-.form-message {
+.form-message,
+.scoreboard-meta {
   margin-top: 1rem;
   min-height: 1.5rem;
   color: var(--muted);

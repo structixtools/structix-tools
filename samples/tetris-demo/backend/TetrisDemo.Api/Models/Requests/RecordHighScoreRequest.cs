@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace TetrisDemo.Api.Models;
+namespace TetrisDemo.Api.Models.Requests;
 
-public sealed class SubmitHighScoreRequest
+public sealed class RecordHighScoreRequest
 {
     [Required]
     [StringLength(24, MinimumLength = 1)]

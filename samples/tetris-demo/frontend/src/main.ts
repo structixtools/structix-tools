@@ -1,4 +1,8 @@
-import { fetchHighScores, submitHighScore } from './api/highscores.js';
+import {
+  fetchHighScoreBoard,
+  fetchLatestHighScore,
+  recordHighScore
+} from './api/highscores.js';
 import { BoardRenderer } from './game/board-renderer.js';
 import { TetrisGame } from './game/engine.js';
 import { requireElement } from './ui/dom.js';
@@ -15,6 +19,7 @@ const scoreForm = requireElement<HTMLFormElement>('#score-form');
 const playerNameInput = requireElement<HTMLInputElement>('#player-name');
 const scoreFormMessage = requireElement<HTMLParagraphElement>('#score-form-message');
 const highScoreBody = requireElement<HTMLTableSectionElement>('#highscore-body');
+const scoreBoardMeta = requireElement<HTMLParagraphElement>('#scoreboard-meta');
 
 const boardContext = boardCanvas.getContext('2d');
 const nextContext = nextCanvas.getContext('2d');
@@ -59,9 +64,18 @@ const gameLoop = (timestamp: number): void => {
 
 const loadHighScores = async (): Promise<void> => {
   try {
-    const scores = await fetchHighScores();
-    highScoreTable.render(scores);
+    const [scoreBoard, latestScore] = await Promise.all([
+      fetchHighScoreBoard(),
+      fetchLatestHighScore()
+    ]);
+    highScoreTable.render(scoreBoard.items);
+
+    const latestLabel = latestScore
+      ? `Latest save: ${latestScore.playerName} · ${latestScore.score.toLocaleString()} points`
+      : 'Latest save: none yet';
+    scoreBoardMeta.textContent = `Showing ${scoreBoard.items.length} saved score${scoreBoard.items.length === 1 ? '' : 's'} · ${latestLabel}`;
   } catch (error) {
+    scoreBoardMeta.textContent = 'Unable to refresh the scoreboard.';
     highScoreTable.renderError(error instanceof Error ? error.message : 'Unable to load high scores.');
   }
 };
@@ -141,7 +155,7 @@ scoreForm.addEventListener('submit', async (event) => {
   setFormMessage('Saving score...');
 
   try {
-    await submitHighScore({
+    await recordHighScore({
       playerName,
       score: state.score,
       lines: state.lines,

@@ -7,28 +7,43 @@ export interface HighScore {
   createdAtUtc: string;
 }
 
-export interface HighScoreResponse {
+export interface HighScoreListResponse {
   items: HighScore[];
+  generatedAtUtc: string;
 }
 
-export interface SubmitHighScoreRequest {
+export interface LatestHighScoreResponse {
+  item: HighScore | null;
+  generatedAtUtc: string;
+}
+
+export interface RecordHighScoreRequest {
   playerName: string;
   score: number;
   lines: number;
   level: number;
 }
 
-export const fetchHighScores = async (): Promise<HighScore[]> => {
-  const response = await fetch('/api/highscores?limit=10');
+export const fetchHighScoreBoard = async (): Promise<HighScoreListResponse> => {
+  const response = await fetch('/api/highscores?limit=10&newestFirst=true');
   if (!response.ok) {
     throw new Error('Failed to load high scores.');
   }
 
-  const payload = (await response.json()) as HighScoreResponse;
-  return payload.items;
+  return (await response.json()) as HighScoreListResponse;
 };
 
-export const submitHighScore = async (request: SubmitHighScoreRequest): Promise<HighScore> => {
+export const fetchLatestHighScore = async (): Promise<HighScore | null> => {
+  const response = await fetch('/api/highscores/latest');
+  if (!response.ok) {
+    throw new Error('Failed to load the latest saved score.');
+  }
+
+  const payload = (await response.json()) as LatestHighScoreResponse;
+  return payload.item;
+};
+
+export const recordHighScore = async (request: RecordHighScoreRequest): Promise<HighScore> => {
   const response = await fetch('/api/highscores', {
     method: 'POST',
     headers: {

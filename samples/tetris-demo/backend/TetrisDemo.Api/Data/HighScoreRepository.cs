@@ -1,21 +1,22 @@
 using Microsoft.Data.Sqlite;
 using TetrisDemo.Api.Models;
+using TetrisDemo.Api.Models.Requests;
 
 namespace TetrisDemo.Api.Data;
 
-public sealed class SqliteHighScoreStore
+public sealed class HighScoreRepository
 {
     private readonly string _connectionString;
-    private readonly ILogger<SqliteHighScoreStore> _logger;
+    private readonly ILogger<HighScoreRepository> _logger;
 
-    public SqliteHighScoreStore(IConfiguration configuration, ILogger<SqliteHighScoreStore> logger)
+    public HighScoreRepository(IConfiguration configuration, ILogger<HighScoreRepository> logger)
     {
         _connectionString = configuration.GetConnectionString("HighScores")
             ?? throw new InvalidOperationException("Missing connection string 'HighScores'.");
         _logger = logger;
     }
 
-    public async Task InitializeAsync(CancellationToken cancellationToken = default)
+    public async Task EnsureCreatedAsync(CancellationToken cancellationToken = default)
     {
         var builder = new SqliteConnectionStringBuilder(_connectionString);
         var dataSource = builder.DataSource;
@@ -50,21 +51,28 @@ public sealed class SqliteHighScoreStore
             """;
 
         await command.ExecuteNonQueryAsync(cancellationToken);
-        _logger.LogInformation("SQLite high score store initialized.");
+        _logger.LogInformation("SQLite high score repository initialized.");
     }
 
-    public async Task<IReadOnlyList<HighScore>> GetTopScoresAsync(int limit, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<HighScore>> GetTopScoresAsync(
+        int limit,
+        bool newestFirst = false,
+        CancellationToken cancellationToken = default)
     {
         var results = new List<HighScore>();
 
         await using var connection = new SqliteConnection(_connectionString);
         await connection.OpenAsync(cancellationToken);
 
+        var orderBy = newestFirst
+            ? "Score DESC, CreatedAtUtc DESC"
+            : "Score DESC, CreatedAtUtc ASC";
+
         var command = connection.CreateCommand();
-        command.CommandText = """
+        command.CommandText = $"""
             SELECT Id, PlayerName, Score, Lines, Level, CreatedAtUtc
             FROM HighScores
-            ORDER BY Score DESC, CreatedAtUtc ASC
+            ORDER BY {orderBy}
             LIMIT $limit;
             """;
         command.Parameters.AddWithValue("$limit", limit);
@@ -86,9 +94,40 @@ public sealed class SqliteHighScoreStore
         return results;
     }
 
-    public async Task<HighScore> InsertAsync(SubmitHighScoreRequest request, CancellationToken cancellationToken = default)
+    public async Task<HighScore?> GetLatestHighScoreAsync(CancellationToken cancellationToken = default)
+    {
+        await using var connection = new SqliteConnection(_connectionString);
+        await connection.OpenAsync(cancellationToken);
+
+        var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT Id, PlayerName, Score, Lines, Level, CreatedAtUtc
+            FROM HighScores
+            ORDER BY CreatedAtUtc DESC
+            LIMIT 1;
+            """;
+
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken);
+        if (!await reader.ReadAsync(cancellationToken))
+        {
+            return null;
+        }
+
+        return new HighScore
+        {
+            Id = reader.GetInt64(0),
+            PlayerName = reader.GetString(1),
+            Score = reader.GetInt32(2),
+            Lines = reader.GetInt32(3),
+            Level = reader.GetInt32(4),
+            CreatedAtUtc = DateTime.Parse(reader.GetString(5)).ToUniversalTime()
+        };
+    }
+
+    public async Task<HighScore> AddAsync(RecordHighScoreRequest request, CancellationToken cancellationToken = default)
     {
         var createdAtUtc = DateTime.UtcNow;
+        var normalizedName = request.PlayerName.Trim();
 
         await using var connection = new SqliteConnection(_connectionString);
         await connection.OpenAsync(cancellationToken);
@@ -99,7 +138,7 @@ public sealed class SqliteHighScoreStore
             VALUES ($playerName, $score, $lines, $level, $createdAtUtc);
             SELECT last_insert_rowid();
             """;
-        command.Parameters.AddWithValue("$playerName", request.PlayerName.Trim());
+        command.Parameters.AddWithValue("$playerName", normalizedName);
         command.Parameters.AddWithValue("$score", request.Score);
         command.Parameters.AddWithValue("$lines", request.Lines);
         command.Parameters.AddWithValue("$level", request.Level);
@@ -111,7 +150,7 @@ public sealed class SqliteHighScoreStore
         return new HighScore
         {
             Id = id,
-            PlayerName = request.PlayerName.Trim(),
+            PlayerName = normalizedName,
             Score = request.Score,
             Lines = request.Lines,
             Level = request.Level,
