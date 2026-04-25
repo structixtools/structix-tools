@@ -1,3 +1,8 @@
+import {
+  calculateHardDropPoints,
+  calculateLineClearPoints,
+  calculateSoftDropPoints
+} from './scoring.js';
 import { getPieceDefinition, randomPieceType, type Matrix, type PieceType } from './tetrominoes.js';
 
 export interface ActivePiece {
@@ -50,13 +55,13 @@ export class TetrisGame {
     this.spawnNextPiece();
   }
 
-  update(deltaMs: number): void {
+  update(deltaMs: number, speedMultiplier = 1): void {
     if (this.stateInternal.isGameOver || this.stateInternal.isPaused) {
       return;
     }
 
     this.dropAccumulator += deltaMs;
-    if (this.dropAccumulator >= this.getDropInterval()) {
+    if (this.dropAccumulator >= this.getDropInterval(speedMultiplier)) {
       this.dropAccumulator = 0;
       this.stepDown();
     }
@@ -79,7 +84,7 @@ export class TetrisGame {
 
   softDrop(): void {
     if (this.stepDown()) {
-      this.stateInternal.score += 1;
+      this.stateInternal.score += calculateSoftDropPoints(1);
     }
   }
 
@@ -93,7 +98,7 @@ export class TetrisGame {
       droppedRows += 1;
     }
 
-    this.stateInternal.score += droppedRows * 2;
+    this.stateInternal.score += calculateHardDropPoints(droppedRows);
     this.lockPiece();
   }
 
@@ -156,8 +161,10 @@ export class TetrisGame {
     };
   }
 
-  private getDropInterval(): number {
-    return Math.max(120, 900 - (this.stateInternal.level - 1) * 70);
+  private getDropInterval(speedMultiplier: number): number {
+    const baseInterval = Math.max(120, 900 - (this.stateInternal.level - 1) * 70);
+    const safeMultiplier = speedMultiplier <= 0 ? 1 : speedMultiplier;
+    return Math.max(80, Math.floor(baseInterval / safeMultiplier));
   }
 
   private stepDown(): boolean {
@@ -235,9 +242,7 @@ export class TetrisGame {
 
     this.stateInternal.lines += cleared.length;
     this.stateInternal.level = Math.floor(this.stateInternal.lines / 10) + 1;
-
-    const lineScores = [0, 100, 300, 500, 800];
-    this.stateInternal.score += lineScores[cleared.length] * this.stateInternal.level;
+    this.stateInternal.score += calculateLineClearPoints(cleared.length, this.stateInternal.level);
   }
 
   private spawnNextPiece(): void {

@@ -1,19 +1,20 @@
 import { fetchHighScores, submitHighScore } from './api/highscores.js';
+import { BoardRenderer } from './game/board-renderer.js';
 import { TetrisGame } from './game/engine.js';
-import { GameRenderer } from './game/renderer.js';
+import { requireElement } from './ui/dom.js';
 import { HighScoreTable } from './ui/highscore-table.js';
 
-const boardCanvas = mustGet<HTMLCanvasElement>('#game-canvas');
-const nextCanvas = mustGet<HTMLCanvasElement>('#next-piece-canvas');
-const startButton = mustGet<HTMLButtonElement>('#start-button');
-const messageBanner = mustGet<HTMLDivElement>('#game-message');
-const scoreValue = mustGet<HTMLSpanElement>('#score-value');
-const linesValue = mustGet<HTMLSpanElement>('#lines-value');
-const levelValue = mustGet<HTMLSpanElement>('#level-value');
-const scoreForm = mustGet<HTMLFormElement>('#score-form');
-const playerNameInput = mustGet<HTMLInputElement>('#player-name');
-const scoreFormMessage = mustGet<HTMLParagraphElement>('#score-form-message');
-const highScoreBody = mustGet<HTMLTableSectionElement>('#highscore-body');
+const boardCanvas = requireElement<HTMLCanvasElement>('#game-canvas');
+const nextCanvas = requireElement<HTMLCanvasElement>('#next-piece-canvas');
+const startButton = requireElement<HTMLButtonElement>('#start-button');
+const messageBanner = requireElement<HTMLDivElement>('#game-message');
+const scoreValue = requireElement<HTMLSpanElement>('#score-value');
+const linesValue = requireElement<HTMLSpanElement>('#lines-value');
+const levelValue = requireElement<HTMLSpanElement>('#level-value');
+const scoreForm = requireElement<HTMLFormElement>('#score-form');
+const playerNameInput = requireElement<HTMLInputElement>('#player-name');
+const scoreFormMessage = requireElement<HTMLParagraphElement>('#score-form-message');
+const highScoreBody = requireElement<HTMLTableSectionElement>('#highscore-body');
 
 const boardContext = boardCanvas.getContext('2d');
 const nextContext = nextCanvas.getContext('2d');
@@ -23,7 +24,7 @@ if (!boardContext || !nextContext) {
 }
 
 const game = new TetrisGame();
-const renderer = new GameRenderer(boardContext, nextContext, game.rows, game.columns);
+const renderer = new BoardRenderer(boardContext, nextContext, game.rows, game.columns);
 const highScoreTable = new HighScoreTable(highScoreBody);
 
 let pendingSubmission = false;
@@ -50,7 +51,8 @@ const syncUi = (): void => {
 const gameLoop = (timestamp: number): void => {
   const delta = timestamp - previousTimestamp;
   previousTimestamp = timestamp;
-  game.update(delta);
+  const speedMultiplier = game.state.level >= 5 ? 1.15 : 1;
+  game.update(delta, speedMultiplier);
   syncUi();
   requestAnimationFrame(gameLoop);
 };
@@ -160,11 +162,3 @@ scoreForm.addEventListener('submit', async (event) => {
 void loadHighScores();
 syncUi();
 requestAnimationFrame(gameLoop);
-
-function mustGet<T extends Element>(selector: string): T {
-  const element = document.querySelector<T>(selector);
-  if (!element) {
-    throw new Error(`Missing element: ${selector}`);
-  }
-  return element;
-}

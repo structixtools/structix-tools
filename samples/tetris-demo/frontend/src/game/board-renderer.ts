@@ -1,6 +1,6 @@
 import { getPieceDefinition, type PieceType } from './tetrominoes.js';
 
-export class GameRenderer {
+export class BoardRenderer {
   constructor(
     private readonly boardContext: CanvasRenderingContext2D,
     private readonly nextPieceContext: CanvasRenderingContext2D,
@@ -10,7 +10,7 @@ export class GameRenderer {
 
   render(board: string[][], nextPieceType: PieceType): void {
     this.drawBoard(board);
-    this.drawNextPiece(nextPieceType);
+    this.drawUpcomingPiece(nextPieceType);
   }
 
   private drawBoard(board: string[][]): void {
@@ -38,7 +38,7 @@ export class GameRenderer {
     }
   }
 
-  private drawNextPiece(type: PieceType): void {
+  private drawUpcomingPiece(type: PieceType): void {
     const definition = getPieceDefinition(type);
     const shape = definition.rotations[0];
     const { canvas } = this.nextPieceContext;
