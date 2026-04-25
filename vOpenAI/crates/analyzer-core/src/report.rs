@@ -634,6 +634,7 @@ const REPORT_HTML_TEMPLATE: &str = r#"<!DOCTYPE html>
       border-radius: 18px;
       padding: 18px;
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+      min-width: 0;
     }
     .panel h2, .panel h3 { margin: 0 0 12px; }
     .panel h2 { font-size: 18px; }
@@ -656,11 +657,13 @@ const REPORT_HTML_TEMPLATE: &str = r#"<!DOCTYPE html>
       border-radius: 16px;
       padding: 14px;
       margin-bottom: 12px;
+      min-width: 0;
+      overflow-wrap: anywhere;
     }
-    .component-title { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; }
-    .component-title strong { font-size: 14px; }
-    .component-title code { color: var(--accent); }
-    .small { font-size: 12px; color: var(--muted); }
+    .component-title { display:flex; justify-content:space-between; gap:12px; align-items:flex-start; flex-wrap: wrap; min-width: 0; }
+    .component-title strong { font-size: 14px; min-width: 0; overflow-wrap: anywhere; }
+    .component-title code { color: var(--accent); white-space: pre-wrap; overflow-wrap: anywhere; }
+    .small { font-size: 12px; color: var(--muted); overflow-wrap: anywhere; word-break: break-word; }
     .bars { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
     .bar {
       min-width: 74px;
@@ -687,6 +690,8 @@ const REPORT_HTML_TEMPLATE: &str = r#"<!DOCTYPE html>
       text-align: left;
       vertical-align: top;
       font-size: 13px;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
     .table th { color: var(--muted); font-weight: 600; }
     .kpi { display:inline-flex; gap: 8px; align-items: center; }
@@ -697,7 +702,7 @@ const REPORT_HTML_TEMPLATE: &str = r#"<!DOCTYPE html>
     .callout { color: var(--muted); font-size: 13px; }
     .empty { color: var(--muted); border: 1px dashed var(--line); border-radius: 14px; padding: 18px; }
     input[type="file"] { color: var(--muted); }
-    code { background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 8px; }
+    code { background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 8px; white-space: pre-wrap; overflow-wrap: anywhere; }
   </style>
 </head>
 <body>

@@ -111,7 +111,7 @@ body { font-family: system-ui, -apple-system, sans-serif; background: var(--colo
   </nav>
   <main id="main-panel"></main>
   <aside id="right-panel">
-    <h3>Architecture Flow</h3>
+    <h3>Change Flow</h3>
     <svg id="flow-svg"></svg>
   </aside>
 </div>
@@ -289,11 +289,20 @@ const HTML_SCRIPT: &str = r##"<script>
   // ── Flow diagram ──────────────────────────────────────────────────────────
   function renderFlowDiagram(m) {
     var svg = document.getElementById('flow-svg');
-    var moved = m.changes.filter(function(c) { return c.kind === 'moved'; });
+    var flows = m.changes.map(function(c) {
+      return {
+        kind: c.kind,
+        name: c.name,
+        source: c.old_file_path || c.file_path,
+        target: c.file_path
+      };
+    }).filter(function(flow) {
+      return flow.source || flow.target;
+    });
 
-    if (moved.length === 0) {
+    if (flows.length === 0) {
       svg.innerHTML = '<text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" ' +
-        'fill="#475569" font-family="system-ui,sans-serif" font-size="12">No moved entities</text>';
+        'fill="#475569" font-family="system-ui,sans-serif" font-size="12">No file relationships to visualize</text>';
       return;
     }
 
@@ -301,10 +310,9 @@ const HTML_SCRIPT: &str = r##"<script>
     var BAR_H = 22;
     var GAP = 8;
     var BAR_W = Math.min(100, Math.floor((W - 40) / 2));
-    var MID_X = W / 2;
 
-    var srcFiles = unique(moved.map(function(c) { return c.old_file_path; }));
-    var dstFiles = unique(moved.map(function(c) { return c.file_path; }));
+    var srcFiles = unique(flows.map(function(c) { return c.source; }));
+    var dstFiles = unique(flows.map(function(c) { return c.target; }));
 
     var srcPos = {};
     var dstPos = {};
@@ -330,22 +338,29 @@ const HTML_SCRIPT: &str = r##"<script>
       return e;
     }
 
+    function strokeForKind(kind) {
+      return {
+        added: '#22c55e',
+        removed: '#ef4444',
+        modified: '#eab308',
+        moved: '#3b82f6',
+        renamed: '#a855f7'
+      }[kind] || '#94a3b8';
+    }
+
     var srcX = 4;
     var dstX = W - BAR_W - 4;
 
-    // Source bars
     srcFiles.forEach(function(f) {
       var cy = srcPos[f];
       svg.appendChild(el('rect', { x: srcX, y: cy - BAR_H/2, width: BAR_W, height: BAR_H, rx: 3,
         fill: '#1e293b', stroke: '#334155', 'stroke-width': 1 }));
       var t = el('text', { x: srcX + 5, y: cy + 4,
-        fill: '#94a3b8', 'font-size': 10, 'font-family': 'system-ui,sans-serif',
-        'clip-path': 'inset(0 0 0 0)' });
+        fill: '#94a3b8', 'font-size': 10, 'font-family': 'system-ui,sans-serif' });
       t.textContent = shortPath(f);
       svg.appendChild(t);
     });
 
-    // Destination bars
     dstFiles.forEach(function(f) {
       var cy = dstPos[f];
       svg.appendChild(el('rect', { x: dstX, y: cy - BAR_H/2, width: BAR_W, height: BAR_H, rx: 3,
@@ -356,24 +371,23 @@ const HTML_SCRIPT: &str = r##"<script>
       svg.appendChild(t);
     });
 
-    // Bezier arcs
-    moved.forEach(function(c) {
-      var y1 = srcPos[c.old_file_path];
-      var y2 = dstPos[c.file_path];
+    flows.forEach(function(flow) {
+      var y1 = srcPos[flow.source];
+      var y2 = dstPos[flow.target];
       var x1 = srcX + BAR_W;
       var x2 = dstX;
       var cx = (x1 + x2) / 2;
       var path = el('path', {
         d: 'M' + x1 + ',' + y1 + ' C' + cx + ',' + y1 + ' ' + cx + ',' + y2 + ' ' + x2 + ',' + y2,
-        fill: 'none', stroke: '#3b82f6', 'stroke-width': 1.5, opacity: 0.65
-      }, c.name);
+        fill: 'none', stroke: strokeForKind(flow.kind), 'stroke-width': flow.kind === 'modified' ? 2 : 1.5, opacity: 0.72
+      }, flow.kind + ': ' + flow.name + ' (' + shortPath(flow.source) + ' → ' + shortPath(flow.target) + ')');
       path.addEventListener('mouseenter', function() {
-        path.setAttribute('stroke-width', 2.5);
+        path.setAttribute('stroke-width', 3);
         path.setAttribute('opacity', 1);
       });
       path.addEventListener('mouseleave', function() {
-        path.setAttribute('stroke-width', 1.5);
-        path.setAttribute('opacity', 0.65);
+        path.setAttribute('stroke-width', flow.kind === 'modified' ? 2 : 1.5);
+        path.setAttribute('opacity', 0.72);
       });
       svg.appendChild(path);
     });
