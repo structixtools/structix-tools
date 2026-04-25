@@ -1,0 +1,15 @@
+## Risk
+- No high-risk API changes detected.
+
+# Change Report
+
+Detected 115 exact clone groups.
+
+## Highlights
+- Exact clone group across multiple ASP.NET Core template DbContext files
+- Exact clone group across Angular resolver index files
+- Exact clone group across AutoMapper integration types
+- Exact clone group across generated proxy public API entrypoints
+- Exact clone group across template startup and migration files
+
+_This is a shortened sample derived from a real analyzer PR-comment output._

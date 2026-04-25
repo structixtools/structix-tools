@@ -25,10 +25,14 @@ jobs:
             label: windows-x86_64
             bin: structix.exe
             asset: structix-windows-x86_64.exe
-          - os: macos-latest
-            label: macos-x86_64-or-arm64
+          - os: macos-13
+            label: macos-x86_64
             bin: structix
-            asset: structix-macos
+            asset: structix-macos-x86_64
+          - os: macos-14
+            label: macos-arm64
+            bin: structix
+            asset: structix-macos-arm64
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -42,11 +46,22 @@ jobs:
         if: runner.os == 'Windows'
         run: copy vAnthropic\target\release\${{ matrix.bin }} ${{ matrix.asset }}
         shell: cmd
-      - name: Upload release asset
+      - name: Generate SHA256 (Unix)
+        if: runner.os != 'Windows'
+        run: shasum -a 256 ${{ matrix.asset }} > ${{ matrix.asset }}.sha256
+      - name: Generate SHA256 (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash -Algorithm SHA256 ${{ matrix.asset }}).Hash.ToLower()
+          "$hash  ${{ matrix.asset }}" | Out-File -FilePath "${{ matrix.asset }}.sha256" -Encoding ascii
+      - name: Upload release assets
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: ${{ matrix.asset }}
+          files: |
+            ${{ matrix.asset }}
+            ${{ matrix.asset }}.sha256
 
   build-analyzer:
     name: Analyzer • ${{ matrix.label }}
@@ -63,10 +78,14 @@ jobs:
             label: windows-x86_64
             bin: analyzer-cli.exe
             asset: analyzer-cli-windows-x86_64.exe
-          - os: macos-latest
-            label: macos-x86_64-or-arm64
+          - os: macos-13
+            label: macos-x86_64
             bin: analyzer-cli
-            asset: analyzer-cli-macos
+            asset: analyzer-cli-macos-x86_64
+          - os: macos-14
+            label: macos-arm64
+            bin: analyzer-cli
+            asset: analyzer-cli-macos-arm64
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -80,8 +99,19 @@ jobs:
         if: runner.os == 'Windows'
         run: copy vOpenAI\target\release\${{ matrix.bin }} ${{ matrix.asset }}
         shell: cmd
-      - name: Upload release asset
+      - name: Generate SHA256 (Unix)
+        if: runner.os != 'Windows'
+        run: shasum -a 256 ${{ matrix.asset }} > ${{ matrix.asset }}.sha256
+      - name: Generate SHA256 (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash -Algorithm SHA256 ${{ matrix.asset }}).Hash.ToLower()
+          "$hash  ${{ matrix.asset }}" | Out-File -FilePath "${{ matrix.asset }}.sha256" -Encoding ascii
+      - name: Upload release assets
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: ${{ matrix.asset }}
+          files: |
+            ${{ matrix.asset }}
+            ${{ matrix.asset }}.sha256

@@ -73,8 +73,16 @@ If you want this as a public open-source repo, a good setup would be:
 
 ## Next Good Steps
 
-1. Add GitHub Actions release builds.
-2. Add versioned binary downloads to the landing page.
-3. Move the site to GitHub Pages / Netlify / Cloudflare Pages.
-4. Add screenshots and example reports.
-5. Add LICENSE files if you want fully public distribution.
+Completed in this repo:
+
+1. ✅ GitHub Actions release builds are configured in [`.github/workflows/release.yml`](./.github/workflows/release.yml), including Windows, Linux, macOS Intel, and macOS Apple Silicon assets plus SHA256 files.
+2. ✅ The landing page now includes versioned release download links and release-link templates in [`site/index.html`](./site/index.html).
+3. ✅ GitHub Pages deployment is configured in [`.github/workflows/pages.yml`](./.github/workflows/pages.yml).
+4. ✅ Example outputs are now linked from the landing page in [`site/examples/`](./site/examples/).
+5. ✅ MIT license files are included for public distribution.
+
+Remaining manual setup:
+
+- Replace the placeholder GitHub repo string (`OWNER/structix-tools`) in `site/index.html` after you publish the repo.
+- Create your first tagged release, e.g. `v0.1.0`, so the download buttons resolve to real assets.
+- If you want actual screenshots in addition to sample outputs, capture them from the generated HTML reports and add them under `site/`.

@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Structix Tools — Open Source Structural Code Analysis</title>
   <meta name="description" content="Open-source Rust tools for structural code analysis, API change detection, duplicate detection, and PR-ready reporting for TypeScript and C#." />
+  <meta name="github-repo" content="OWNER/structix-tools" />
+  <meta name="release-version" content="v0.1.0" />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
@@ -16,7 +18,7 @@
           <a href="#projects">Projects</a>
           <a href="#downloads">Downloads</a>
           <a href="#manuals">Manuals</a>
-          <a href="#repo">Repo</a>
+          <a href="#examples">Examples</a>
         </div>
       </nav>
 
@@ -130,17 +132,25 @@ $ analyzer-cli --repo . --base main --head HEAD --format pr-comment
       <div class="container">
         <div class="section-head">
           <h2>Download / install</h2>
-          <p>Ready for GitHub Releases. Build locally now, then wire the buttons to release assets later.</p>
+          <p>Release buttons are generated from the configured GitHub repo and version metadata. Update them when you publish.</p>
+        </div>
+
+        <div class="release-meta card">
+          <div><strong>GitHub repo</strong><span><code id="github-repo-value">OWNER/structix-tools</code></span></div>
+          <div><strong>Version</strong><span><code id="release-version-value">v0.1.0</code></span></div>
+          <div><strong>Latest URL pattern</strong><span><code id="latest-url-pattern"></code></span></div>
         </div>
 
         <div class="grid two">
           <article class="card download-card">
             <h3>Structix</h3>
             <div class="download-table">
-              <div><strong>Windows</strong><span>Binary target: <code>structix.exe</code></span></div>
-              <div><strong>Linux / WSL</strong><span>Binary target: <code>structix</code></span></div>
-              <div><strong>macOS</strong><span>Recommended via GitHub Actions release build</span></div>
+              <div><strong>Windows</strong><span>Binary target: <code>structix-windows-x86_64.exe</code></span></div>
+              <div><strong>Linux / WSL</strong><span>Binary target: <code>structix-linux-x86_64</code></span></div>
+              <div><strong>macOS Intel</strong><span>Binary target: <code>structix-macos-x86_64</code></span></div>
+              <div><strong>macOS Apple Silicon</strong><span>Binary target: <code>structix-macos-arm64</code></span></div>
             </div>
+            <div class="cta-row release-links" data-tool="structix"></div>
             <pre><code>cd vAnthropic
 cargo build --release</code></pre>
             <div class="cta-row">
@@ -151,10 +161,12 @@ cargo build --release</code></pre>
           <article class="card download-card">
             <h3>Analyzer</h3>
             <div class="download-table">
-              <div><strong>Windows</strong><span>Binary target: <code>analyzer-cli.exe</code></span></div>
-              <div><strong>Linux / WSL</strong><span>Binary target: <code>analyzer-cli</code></span></div>
-              <div><strong>macOS</strong><span>Recommended via GitHub Actions release build</span></div>
+              <div><strong>Windows</strong><span>Binary target: <code>analyzer-cli-windows-x86_64.exe</code></span></div>
+              <div><strong>Linux / WSL</strong><span>Binary target: <code>analyzer-cli-linux-x86_64</code></span></div>
+              <div><strong>macOS Intel</strong><span>Binary target: <code>analyzer-cli-macos-x86_64</code></span></div>
+              <div><strong>macOS Apple Silicon</strong><span>Binary target: <code>analyzer-cli-macos-arm64</code></span></div>
             </div>
+            <div class="cta-row release-links" data-tool="analyzer-cli"></div>
             <pre><code>cd vOpenAI
 cargo build --release -p analyzer-cli</code></pre>
             <div class="cta-row">
@@ -164,7 +176,49 @@ cargo build --release -p analyzer-cli</code></pre>
         </div>
 
         <div class="notice">
-          <strong>Recommended release assets:</strong> Windows x86_64, Linux x86_64, macOS Intel, macOS Apple Silicon.
+          <strong>Release setup:</strong> push a tag like <code>v0.1.0</code>, let GitHub Actions attach binaries, then update the metadata above if you want pinned version buttons.
+        </div>
+      </div>
+    </section>
+
+    <section id="examples" class="section muted">
+      <div class="container">
+        <div class="section-head">
+          <h2>Example outputs</h2>
+          <p>Preview the kind of reports and PR artifacts these tools generate.</p>
+        </div>
+
+        <div class="grid two">
+          <article class="card example-card">
+            <h3>Structix HTML report</h3>
+            <p>Interactive entity-level diff report with change pills, file navigation, and architecture-flow visualization.</p>
+            <div class="example-preview browser-frame">
+              <div class="browser-bar"></div>
+              <iframe src="./examples/structix-report.html" title="Structix example report" loading="lazy"></iframe>
+            </div>
+            <div class="cta-row">
+              <a class="button secondary" href="./examples/structix-report.html">Open example report</a>
+            </div>
+          </article>
+
+          <article class="card example-card">
+            <h3>Analyzer PR comment</h3>
+            <p>Compact review-ready output for pull requests, CI jobs, and summary bots.</p>
+            <pre class="example-pre"><code>## Risk
+- No high-risk API changes detected.
+
+# Change Report
+
+Detected 115 exact clone groups.
+
+## Highlights
+- Exact clone group across multiple ASP.NET Core template DbContext files
+- Exact clone group across Angular resolver index files
+- Exact clone group across AutoMapper integration types</code></pre>
+            <div class="cta-row">
+              <a class="button secondary" href="./examples/analyzer-pr-comment.txt">Open text sample</a>
+            </div>
+          </article>
         </div>
       </div>
     </section>
@@ -220,28 +274,6 @@ cargo build --release -p analyzer-cli</code></pre>
       </div>
     </section>
 
-    <section id="repo" class="section muted">
-      <div class="container">
-        <div class="section-head">
-          <h2>Suggested repo strategy</h2>
-          <p>Ship both tools from one public-facing umbrella repository.</p>
-        </div>
-        <div class="card repo-layout">
-          <pre><code>structix-tools/
-├─ README.md
-├─ CONTRIBUTING.md
-├─ LICENSE
-├─ docs/
-├─ site/
-├─ .github/workflows/
-├─ vAnthropic/
-└─ vOpenAI/</code></pre>
-          <p>
-            Use GitHub Releases for binaries, GitHub Pages for the landing page, and GitHub Actions for cross-platform builds.
-          </p>
-        </div>
-      </div>
-    </section>
   </main>
 
   <footer class="footer">
@@ -251,11 +283,53 @@ cargo build --release -p analyzer-cli</code></pre>
         <p>Open-source code intelligence for TypeScript and C# teams.</p>
       </div>
       <div class="footer-links">
-        <a href="./index.html#repo">Monorepo README</a>
+        <a href="./index.html">Home</a>
         <a href="./structix.html">Structix</a>
         <a href="./analyzer.html">Analyzer</a>
       </div>
     </div>
   </footer>
+
+  <script>
+    (function () {
+      var repo = document.querySelector('meta[name="github-repo"]').content;
+      var version = document.querySelector('meta[name="release-version"]').content;
+      var baseVersioned = 'https://github.com/' + repo + '/releases/download/' + version + '/';
+      var baseLatest = 'https://github.com/' + repo + '/releases/latest/download/';
+
+      document.getElementById('github-repo-value').textContent = repo;
+      document.getElementById('release-version-value').textContent = version;
+      document.getElementById('latest-url-pattern').textContent = baseLatest + '<asset-name>';
+
+      var assetsByTool = {
+        'structix': [
+          ['Windows', 'structix-windows-x86_64.exe'],
+          ['Linux', 'structix-linux-x86_64'],
+          ['macOS Intel', 'structix-macos-x86_64'],
+          ['macOS ARM', 'structix-macos-arm64']
+        ],
+        'analyzer-cli': [
+          ['Windows', 'analyzer-cli-windows-x86_64.exe'],
+          ['Linux', 'analyzer-cli-linux-x86_64'],
+          ['macOS Intel', 'analyzer-cli-macos-x86_64'],
+          ['macOS ARM', 'analyzer-cli-macos-arm64']
+        ]
+      };
+
+      document.querySelectorAll('.release-links').forEach(function (el) {
+        var tool = el.dataset.tool;
+        assetsByTool[tool].forEach(function (entry) {
+          var label = entry[0];
+          var asset = entry[1];
+          var a = document.createElement('a');
+          a.className = 'button secondary compact';
+          a.href = baseVersioned + asset;
+          a.textContent = label;
+          a.title = baseLatest + asset;
+          el.appendChild(a);
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
