@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analyzer Manual</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <main class="section">
+    <div class="container doc-page">
+      <a class="button secondary" href="../index.html">← Back to home</a>
+      <h1>Analyzer Manual</h1>
+      <p class="lead">Analyzer is a Rust workspace for structured comparison of C# and TypeScript repositories across git refs.</p>
+
+      <div class="card">
+        <h2>What Analyzer does</h2>
+        <p>Analyzer compares a base ref and a head ref, then produces reports for humans, automation, and pull-request workflows.</p>
+        <ul>
+          <li>file changes</li>
+          <li>symbol changes</li>
+          <li>API changes</li>
+          <li>clone groups</li>
+          <li>clone drift</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Build</h2>
+<pre><code>cd vOpenAI
+cargo build --release -p analyzer-cli</code></pre>
+        <ul>
+          <li>Linux / WSL: <code>target/release/analyzer-cli</code></li>
+          <li>Windows: <code>target/release/analyzer-cli.exe</code></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>CLI usage</h2>
+<pre><code>cargo run -p analyzer-cli -- \
+  --repo /path/to/repo \
+  --base main \
+  --head HEAD \
+  --format markdown</code></pre>
+        <p>Required arguments:</p>
+        <ul>
+          <li><code>--repo &lt;path&gt;</code></li>
+          <li><code>--base &lt;ref&gt;</code></li>
+          <li><code>--head &lt;ref&gt;</code></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Output formats</h2>
+        <ul>
+          <li><code>markdown</code></li>
+          <li><code>json</code></li>
+          <li><code>pr-comment</code></li>
+          <li><code>html</code></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Typical workflows</h2>
+<pre><code>cargo run -p analyzer-cli -- --repo . --base main --head HEAD --format markdown
+cargo run -p analyzer-cli -- --repo . --base main --head HEAD --format json
+cargo run -p analyzer-cli -- --repo . --base main --head HEAD --format pr-comment
+cargo run -p analyzer-cli -- --repo . --base main --head HEAD --format html > report.html</code></pre>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

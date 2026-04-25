@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analyzer — Project Guide</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="section">
+    <div class="container doc-page">
+      <a class="button secondary" href="./index.html">← Back to home</a>
+      <h1>Analyzer</h1>
+      <p class="lead">A Rust workspace for structured comparison of C# and TypeScript repositories across git refs, designed for engineering review, API change awareness, and PR workflows.</p>
+
+      <div class="card">
+        <h2>Core capabilities</h2>
+        <ul>
+          <li>Base/head repository comparison</li>
+          <li>File changes, symbol changes, and API changes</li>
+          <li>Clone groups and clone drift detection</li>
+          <li>Outputs: Markdown, JSON, PR-comment, HTML</li>
+          <li>CLI + core workspace architecture</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Build</h2>
+<pre><code>cd vOpenAI
+cargo build --release -p analyzer-cli</code></pre>
+        <p>Binary output:</p>
+        <ul>
+          <li>Linux / WSL: <code>target/release/analyzer-cli</code></li>
+          <li>Windows: <code>target/release/analyzer-cli.exe</code></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Main command</h2>
+<pre><code>analyzer-cli --repo /path/to/repo --base main --head HEAD --format markdown</code></pre>
+        <h3>Examples</h3>
+<pre><code>cargo run -p analyzer-cli -- --repo . --base main --head HEAD --format markdown
+cargo run -p analyzer-cli -- --repo . --base main --head HEAD --format pr-comment
+cargo run -p analyzer-cli -- --repo . --base main --head HEAD --format html > report.html</code></pre>
+      </div>
+
+      <div class="links" style="margin-top:1.5rem">
+        <a class="button secondary" href="./docs/analyzer-manual.html">Read detailed manual</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

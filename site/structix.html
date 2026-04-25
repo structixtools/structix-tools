@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Structix — Project Guide</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="section">
+    <div class="container doc-page">
+      <a class="button secondary" href="./index.html">← Back to home</a>
+      <h1>Structix</h1>
+      <p class="lead">Structural code analysis CLI for TypeScript and C# codebases. It diffs code at the entity level across git commits and detects duplicate code, with optional AI narration via Claude.</p>
+
+      <div class="card">
+        <h2>Core capabilities</h2>
+        <ul>
+          <li>Structural diff between git refs</li>
+          <li>Entity-level change types: added, removed, modified, moved, renamed</li>
+          <li>Duplicate detection: exact clones and structural clones</li>
+          <li>Outputs: terminal, JSON, Markdown prompt, HTML</li>
+          <li>Optional Claude-powered explanations</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Build</h2>
+<pre><code>cd vAnthropic
+cargo build --release</code></pre>
+        <p>Binary output:</p>
+        <ul>
+          <li>Linux / WSL: <code>target/release/structix</code></li>
+          <li>Windows: <code>target/release/structix.exe</code></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Main commands</h2>
+<pre><code>structix diff [REPO_PATH] [OPTIONS]
+structix duplicates [REPO_PATH] [OPTIONS]</code></pre>
+        <h3>Examples</h3>
+<pre><code>structix diff . --from HEAD~1 --to HEAD
+structix diff . --from main --to HEAD --html -o report.html
+structix duplicates .
+ANTHROPIC_API_KEY=... structix diff . --from main --to HEAD --explain</code></pre>
+      </div>
+
+      <div class="links" style="margin-top:1.5rem">
+        <a class="button secondary" href="./docs/structix-manual.html">Read detailed manual</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

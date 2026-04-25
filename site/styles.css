@@ -218,6 +218,15 @@ th { color: var(--accent-2); }
   gap: 1rem;
   flex-wrap: wrap;
 }
+.doc-page {
+  max-width: 900px;
+}
+.doc-page > .card {
+  margin-top: 1rem;
+}
+.doc-page h1 {
+  margin-bottom: 0.5rem;
+}
 
 @media (max-width: 900px) {
   .hero-grid,
