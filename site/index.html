@@ -132,7 +132,7 @@ $ analyzer-cli --repo . --base main --head HEAD --format pr-comment
       <div class="container">
         <div class="section-head">
           <h2>Download / install</h2>
-          <p>Release buttons are generated from the configured GitHub repo and version metadata. Update them when you publish.</p>
+          <p>Release buttons point to the latest GitHub release automatically. Keep the version metadata here as a display/reference value.</p>
         </div>
 
         <div class="release-meta card">
@@ -321,9 +321,9 @@ Detected 4 added files, 4 modified files, 1 removed file, 4 renamed files, 42 sy
           var asset = entry[1];
           var a = document.createElement('a');
           a.className = 'button secondary compact';
-          a.href = baseVersioned + asset;
+          a.href = baseLatest + asset;
           a.textContent = label;
-          a.title = baseLatest + asset;
+          a.title = 'Latest: ' + baseLatest + asset + ' | Pinned: ' + baseVersioned + asset;
           el.appendChild(a);
         });
       });
