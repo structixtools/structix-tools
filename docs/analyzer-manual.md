@@ -136,6 +136,11 @@ cargo run -p analyzer-cli -- --repo . --base main --head HEAD --format html > re
 cargo run -p analyzer-cli -- --repo . --base main --head HEAD --path samples/tetris-demo --format html > report.html
 ```
 
+Real checked-in samples:
+
+- `site/examples/tetris-analyzer-report.html`
+- `site/examples/tetris-analyzer-pr-comment.txt`
+
 ---
 
 ## Strengths

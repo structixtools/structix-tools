@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Structix Report</title>
+<style>
+:root {
+  --color-added:    #22c55e;
+  --color-removed:  #ef4444;
+  --color-modified: #eab308;
+  --color-moved:    #3b82f6;
+  --color-renamed:  #a855f7;
+  --color-bg:       #0f172a;
+  --color-surface:  #1e293b;
+  --color-border:   #334155;
+  --color-text:     #e2e8f0;
+  --color-muted:    #94a3b8;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, sans-serif; background: var(--color-bg); color: var(--color-text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+/* Header */
+#header-bar { display: flex; align-items: center; gap: 1rem; padding: 0.6rem 1.25rem; background: var(--color-surface); border-bottom: 1px solid var(--color-border); flex-shrink: 0; flex-wrap: wrap; }
+#repo-title { font-weight: 700; font-size: 1rem; letter-spacing: -0.01em; }
+#ref-range { font-family: monospace; font-size: 0.85rem; color: var(--color-muted); }
+#pill-row { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-left: auto; }
+.pill { padding: 2px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; }
+.pill-added    { background: rgba(34,197,94,0.15);   color: var(--color-added); }
+.pill-removed  { background: rgba(239,68,68,0.15);   color: var(--color-removed); }
+.pill-modified { background: rgba(234,179,8,0.15);   color: var(--color-modified); }
+.pill-moved    { background: rgba(59,130,246,0.15);  color: var(--color-moved); }
+.pill-renamed  { background: rgba(168,85,247,0.15);  color: var(--color-renamed); }
+
+/* Layout */
+#layout { display: grid; grid-template-columns: 220px 1fr 260px; flex: 1; min-height: 0; }
+#sidebar { overflow-y: auto; border-right: 1px solid var(--color-border); padding: 0.6rem; }
+#main-panel { overflow-y: auto; padding: 1rem; }
+#right-panel { overflow-y: auto; border-left: 1px solid var(--color-border); padding: 0.75rem; display: flex; flex-direction: column; }
+#right-panel h3 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-muted); margin-bottom: 0.5rem; flex-shrink: 0; }
+#flow-svg { flex: 1; min-height: 0; width: 100%; }
+
+/* Footer */
+#stats-bar { height: 32px; display: flex; align-items: center; padding: 0 1.25rem; border-top: 1px solid var(--color-border); background: var(--color-surface); font-size: 0.78rem; color: var(--color-muted); flex-shrink: 0; }
+
+/* Sidebar */
+#sidebar-all { display: flex; justify-content: space-between; align-items: center; padding: 0.3rem 0.5rem; border-radius: 4px; cursor: pointer; font-size: 0.8rem; color: var(--color-muted); margin-bottom: 0.25rem; }
+#sidebar-all:hover, #sidebar-all.active { background: var(--color-border); color: var(--color-text); }
+.file-entry { display: flex; justify-content: space-between; align-items: center; padding: 0.28rem 0.5rem; border-radius: 4px; cursor: pointer; font-size: 0.78rem; }
+.file-entry:hover { background: var(--color-border); }
+.file-entry.active { background: var(--color-border); color: var(--color-text); }
+.file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; color: var(--color-muted); }
+.file-entry.active .file-name { color: var(--color-text); }
+.file-badge { font-size: 0.68rem; background: rgba(255,255,255,0.07); padding: 1px 6px; border-radius: 10px; flex-shrink: 0; margin-left: 4px; }
+
+/* Group headers */
+.file-group-header { font-size: 0.75rem; color: var(--color-muted); margin: 1rem 0 0.4rem; padding-bottom: 0.3rem; border-bottom: 1px solid var(--color-border); font-family: monospace; word-break: break-all; }
+.file-group-header:first-child { margin-top: 0; }
+
+/* Entity cards */
+.entity-card { border-left: 3px solid transparent; border-radius: 4px; background: var(--color-surface); margin-bottom: 0.4rem; }
+.entity-card[data-kind="added"]    { border-left-color: var(--color-added); }
+.entity-card[data-kind="removed"]  { border-left-color: var(--color-removed); }
+.entity-card[data-kind="modified"] { border-left-color: var(--color-modified); }
+.entity-card[data-kind="moved"]    { border-left-color: var(--color-moved); }
+.entity-card[data-kind="renamed"]  { border-left-color: var(--color-renamed); }
+.card-header { display: flex; align-items: center; gap: 0.45rem; padding: 0.5rem 0.75rem; cursor: pointer; user-select: none; }
+.card-header:hover { background: rgba(255,255,255,0.03); border-radius: 4px; }
+.entity-badge { font-size: 0.6rem; font-weight: 700; background: rgba(255,255,255,0.08); padding: 2px 5px; border-radius: 3px; text-transform: uppercase; flex-shrink: 0; letter-spacing: 0.03em; }
+.entity-name { font-weight: 600; font-size: 0.88rem; }
+.entity-kind-tag { font-size: 0.72rem; color: var(--color-muted); }
+.change-kind-tag { margin-left: auto; font-size: 0.7rem; color: var(--color-muted); flex-shrink: 0; }
+.card-detail { display: none; padding: 0 0.75rem 0.65rem; font-size: 0.82rem; }
+.entity-card.expanded .card-detail { display: block; }
+.detail-divider { height: 1px; background: var(--color-border); margin-bottom: 0.5rem; }
+
+/* Signature diff */
+.sig-row { font-family: monospace; padding: 0.2rem 0.5rem; border-radius: 3px; margin: 0.2rem 0; font-size: 0.8rem; word-break: break-all; }
+.sig-before { background: rgba(239,68,68,0.12); color: #fca5a5; }
+.sig-after  { background: rgba(34,197,94,0.12);  color: #86efac; }
+
+/* Path move row */
+.path-row { font-family: monospace; font-size: 0.78rem; margin-bottom: 0.4rem; word-break: break-all; }
+.path-old { color: #fca5a5; }
+.path-new { color: #86efac; }
+.path-arrow { color: var(--color-muted); margin: 0 0.3rem; }
+
+/* Source blocks */
+.source-label { font-size: 0.7rem; color: var(--color-muted); margin: 0.5rem 0 0.2rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.source-block { background: #020617; border-radius: 4px; padding: 0.5rem 0.6rem; font-family: monospace; font-size: 0.76rem; white-space: pre-wrap; overflow-x: auto; max-height: 260px; overflow-y: auto; border: 1px solid var(--color-border); }
+
+/* Empty state */
+.empty-state { color: var(--color-muted); font-size: 0.85rem; padding: 2rem; text-align: center; }
+</style>
+</head>
+<body>
+<div id="header-bar">
+  <span id="repo-title">Structix Report</span>
+  <span id="ref-range"></span>
+  <div id="pill-row"></div>
+</div>
+<div id="layout">
+  <nav id="sidebar">
+    <div id="sidebar-all" class="active">
+      <span>All files</span>
+      <span id="sidebar-all-count" class="file-badge"></span>
+    </div>
+    <div id="file-tree"></div>
+  </nav>
+  <main id="main-panel"></main>
+  <aside id="right-panel">
+    <h3>Architecture Flow</h3>
+    <svg id="flow-svg"></svg>
+  </aside>
+</div>
+<footer id="stats-bar"><span id="stats-summary"></span></footer>
+<script id="structix-data" type="application/json">{"from_ref":"ecce58c","to_ref":"f2123e8","changes":[{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::method::TetrisGame::hardDrop","name":"hardDrop","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"method","before_signature":null,"after_signature":"()","before_source":null,"after_source":"hardDrop(): void {\n    if (!this.stateInternal.currentPiece || this.stateInternal.isPaused || this.stateInternal.isGameOver) {\n      return;\n    }\n\n    let droppedRows = 0;\n    while (this.tryMove(1, 0)) {\n      droppedRows += 1;\n    }\n\n    this.stateInternal.score += droppedRows * 2;\n    this.lockPiece();\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::method::TetrisGame::createInitialState","name":"createInitialState","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"method","before_signature":null,"after_signature":"()","before_source":null,"after_source":"private createInitialState(): GameState {\n    return {\n      board: Array.from({ length: this.rows }, () => Array.from({ length: this.columns }, () => '')),\n      currentPiece: null,\n      nextPieceType: randomPieceType(),\n      score: 0,\n      lines: 0,\n      level: 1,\n      isGameOver: false,\n      isPaused: false\n    };\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::method::TetrisGame::moveRight","name":"moveRight","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"method","before_signature":null,"after_signature":"()","before_source":null,"after_source":"moveRight(): void {\n    this.tryMove(0, 1);\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::method::TetrisGame::lockPiece","name":"lockPiece","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"method","before_signature":null,"after_signature":"()","before_source":null,"after_source":"private lockPiece(): void {\n    const piece = this.stateInternal.currentPiece;\n    if (!piece) {\n      return;\n    }\n\n    const definition = getPieceDefinition(piece.type);\n    const shape = definition.rotations[piece.rotation];\n\n    shape.forEach((row, rowIndex) => {\n      row.forEach((cell, columnIndex) => {\n        if (!cell) {\n          return;\n        }\n\n        const boardRow = piece.row + rowIndex;\n        const boardColumn = piece.column + columnIndex;\n        if (boardRow >= 0) {\n          this.stateInternal.board[boardRow][boardColumn] = definition.color;\n        }\n      });\n    });\n\n    this.clearLines();\n    this.spawnNextPiece();\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/ui/highscore-table.ts::constructor::HighScoreTable::constructor","name":"constructor","file_path":"samples/tetris-demo/frontend/src/ui/highscore-table.ts","entity_kind":"constructor","before_signature":null,"after_signature":"(private readonly tbody: HTMLTableSectionElement)","before_source":null,"after_source":"constructor(private readonly tbody: HTMLTableSectionElement) {}","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/main.ts::function::::mustGet","name":"mustGet","file_path":"samples/tetris-demo/frontend/src/main.ts","entity_kind":"function","before_signature":null,"after_signature":"mustGet(selector: string): T","before_source":null,"after_source":"function mustGet<T extends Element>(selector: string): T {\n  const element = document.querySelector<T>(selector);\n  if (!element) {\n    throw new Error(`Missing element: ${selector}`);\n  }\n  return element;\n}","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/api/highscores.ts::interface::::HighScore","name":"HighScore","file_path":"samples/tetris-demo/frontend/src/api/highscores.ts","entity_kind":"interface","before_signature":null,"after_signature":"","before_source":null,"after_source":"interface HighScore {\n  id: number;\n  playerName: string;\n  score: number;\n  lines: number;\n  level: number;\n  createdAtUtc: string;\n}","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/api/highscores.ts::interface::::HighScoreResponse","name":"HighScoreResponse","file_path":"samples/tetris-demo/frontend/src/api/highscores.ts","entity_kind":"interface","before_signature":null,"after_signature":"","before_source":null,"after_source":"interface HighScoreResponse {\n  items: HighScore[];\n}","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/renderer.ts::method::GameRenderer::drawNextPiece","name":"drawNextPiece","file_path":"samples/tetris-demo/frontend/src/game/renderer.ts","entity_kind":"method","before_signature":null,"after_signature":"(type: PieceType)","before_source":null,"after_source":"private drawNextPiece(type: PieceType): void {\n    const definition = getPieceDefinition(type);\n    const shape = definition.rotations[0];\n    const { canvas } = this.nextPieceContext;\n    const cellSize = 24;\n    const offsetX = (canvas.width - shape[0].length * cellSize) / 2;\n    const offsetY = (canvas.height - shape.length * cellSize) / 2;\n\n    this.nextPieceContext.clearRect(0, 0, canvas.width, canvas.height);\n    this.nextPieceContext.fillStyle = '#020617';\n    this.nextPieceContext.fillRect(0, 0, canvas.width, canvas.height);\n\n    shape.forEach((row, rowIndex) => {\n      row.forEach((cell, columnIndex) => {\n        if (!cell) {\n          return;\n        }\n\n        this.nextPieceContext.fillStyle = definition.color;\n        this.nextPieceContext.fillRect(offsetX + columnIndex * cellSize, offsetY + rowIndex * cellSize, cellSize - 2, cellSize - 2);\n      });\n    });\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/api/highscores.ts::interface::::SubmitHighScoreRequest","name":"SubmitHighScoreRequest","file_path":"samples/tetris-demo/frontend/src/api/highscores.ts","entity_kind":"interface","before_signature":null,"after_signature":"","before_source":null,"after_source":"interface SubmitHighScoreRequest {\n  playerName: string;\n  score: number;\n  lines: number;\n  level: number;\n}","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs::class::::SqliteHighScoreStore","name":"SqliteHighScoreStore","file_path":"samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs","entity_kind":"class","before_signature":null,"after_signature":"SqliteHighScoreStore","before_source":null,"after_source":"public sealed class SqliteHighScoreStore\n{\n    private readonly string _connectionString;\n    private readonly ILogger<SqliteHighScoreStore> _logger;\n\n    public SqliteHighScoreStore(IConfiguration configuration, ILogger<SqliteHighScoreStore> logger)\n    {\n        _connectionString = configuration.GetConnectionString(\"HighScores\")\n            ?? throw new InvalidOperationException(\"Missing connection string 'HighScores'.\");\n        _logger = logger;\n    }\n\n    public async Task InitializeAsync(CancellationToken cancellationToken = default)\n    {\n        var builder = new SqliteConnectionStringBuilder(_connectionString);\n        var dataSource = builder.DataSource;\n\n        if (!string.IsNullOrWhiteSpace(dataSource))\n        {\n            var fullPath = Path.IsPathRooted(dataSource)\n                ? dataSource\n                : Path.Combine(AppContext.BaseDirectory, dataSource);\n            var directory = Path.GetDirectoryName(fullPath);\n\n            if (!string.IsNullOrWhiteSpace(directory))\n            {\n                Directory.CreateDirectory(directory);\n            }\n        }\n\n        await using var connection = new SqliteConnection(_connectionString);\n        await connection.OpenAsync(cancellationToken);\n\n        var command = connection.CreateCommand();\n        command.CommandText = \"\"\"\n            CREATE TABLE IF NOT EXISTS HighScores (\n                Id INTEGER PRIMARY KEY AUTOINCREMENT,\n                PlayerName TEXT NOT NULL,\n                Score INTEGER NOT NULL,\n                Lines INTEGER NOT NULL,\n                Level INTEGER NOT NULL,\n                CreatedAtUtc TEXT NOT NULL\n            );\n            CREATE INDEX IF NOT EXISTS IX_HighScores_Score ON HighScores (Score DESC, CreatedAtUtc ASC);\n            \"\"\";\n\n        await command.ExecuteNonQueryAsync(cancellationToken);\n        _logger.LogInformation(\"SQLite high score store initialized.\");\n    }\n\n    public async Task<IReadOnlyList<HighScore>> GetTopScoresAsync(int limit, CancellationToken cancellationToken = default)\n    {\n        var results = new List<HighScore>();\n\n        await using var connection = new SqliteConnection(_connectionString);\n        await connection.OpenAsync(cancellationToken);\n\n        var command = connection.CreateCommand();\n        command.CommandText = \"\"\"\n            SELECT Id, PlayerName, Score, Lines, Level, CreatedAtUtc\n            FROM HighScores\n            ORDER BY Score DESC, CreatedAtUtc ASC\n            LIMIT $limit;\n            \"\"\";\n        command.Parameters.AddWithValue(\"$limit\", limit);\n\n        await using var reader = await command.ExecuteReaderAsync(cancellationToken);\n        while (await reader.ReadAsync(cancellationToken))\n        {\n            results.Add(new HighScore\n            {\n                Id = reader.GetInt64(0),\n                PlayerName = reader.GetString(1),\n                Score = reader.GetInt32(2),\n                Lines = reader.GetInt32(3),\n                Level = reader.GetInt32(4),\n                CreatedAtUtc = DateTime.Parse(reader.GetString(5)).ToUniversalTime()\n            });\n        }\n\n        return results;\n    }\n\n    public async Task<HighScore> InsertAsync(SubmitHighScoreRequest request, CancellationToken cancellationToken = default)\n    {\n        var createdAtUtc = DateTime.UtcNow;\n\n        await using var connection = new SqliteConnection(_connectionString);\n        await connection.OpenAsync(cancellationToken);\n\n        var command = connection.CreateCommand();\n        command.CommandText = \"\"\"\n            INSERT INTO HighScores (PlayerName, Score, Lines, Level, CreatedAtUtc)\n            VALUES ($playerName, $score, $lines, $level, $createdAtUtc);\n            SELECT last_insert_rowid();\n            \"\"\";\n        command.Parameters.AddWithValue(\"$playerName\", request.PlayerName.Trim());\n        command.Parameters.AddWithValue(\"$score\", request.Score);\n        command.Parameters.AddWithValue(\"$lines\", request.Lines);\n        command.Parameters.AddWithValue(\"$level\", request.Level);\n        command.Parameters.AddWithValue(\"$createdAtUtc\", createdAtUtc.ToString(\"O\"));\n\n        var id = (long)(await command.ExecuteScalarAsync(cancellationToken)\n            ?? throw new InvalidOperationException(\"Failed to insert high score.\"));\n\n        return new HighScore\n        {\n            Id = id,\n            PlayerName = request.PlayerName.Trim(),\n            Score = request.Score,\n            Lines = request.Lines,\n            Level = request.Level,\n            CreatedAtUtc = createdAtUtc\n        };\n    }\n}","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::interface::::ActivePiece","name":"ActivePiece","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"interface","before_signature":null,"after_signature":"","before_source":null,"after_source":"interface ActivePiece {\n  type: PieceType;\n  rotation: number;\n  row: number;\n  column: number;\n}","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::property::TetrisGame::dropAccumulator","name":"dropAccumulator","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"property","before_signature":null,"after_signature":"","before_source":null,"after_source":"private dropAccumulator = 0","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::method::TetrisGame::togglePause","name":"togglePause","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"method","before_signature":null,"after_signature":"()","before_source":null,"after_source":"togglePause(): void {\n    if (this.stateInternal.isGameOver) {\n      return;\n    }\n    this.stateInternal.isPaused = !this.stateInternal.isPaused;\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::method::TetrisGame::spawnNextPiece","name":"spawnNextPiece","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"method","before_signature":null,"after_signature":"()","before_source":null,"after_source":"private spawnNextPiece(): void {\n    const type = this.stateInternal.nextPieceType;\n    this.stateInternal.nextPieceType = randomPieceType();\n\n    const definition = getPieceDefinition(type);\n    const shape = definition.rotations[0];\n    const spawnColumn = Math.floor((this.columns - shape[0].length) / 2);\n    const spawnPiece: ActivePiece = {\n      type,\n      rotation: 0,\n      row: 0,\n      column: spawnColumn\n    };\n\n    if (this.collides(spawnPiece)) {\n      this.stateInternal.currentPiece = null;\n      this.stateInternal.isGameOver = true;\n      return;\n    }\n\n    this.stateInternal.currentPiece = spawnPiece;\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/renderer.ts::class::::GameRenderer","name":"GameRenderer","file_path":"samples/tetris-demo/frontend/src/game/renderer.ts","entity_kind":"class","before_signature":null,"after_signature":"GameRenderer","before_source":null,"after_source":"class GameRenderer {\n  constructor(\n    private readonly boardContext: CanvasRenderingContext2D,\n    private readonly nextPieceContext: CanvasRenderingContext2D,\n    private readonly rows: number,\n    private readonly columns: number\n  ) {}\n\n  render(board: string[][], nextPieceType: PieceType): void {\n    this.drawBoard(board);\n    this.drawNextPiece(nextPieceType);\n  }\n\n  private drawBoard(board: string[][]): void {\n    const { canvas } = this.boardContext;\n    const cellWidth = canvas.width / this.columns;\n    const cellHeight = canvas.height / this.rows;\n\n    this.boardContext.clearRect(0, 0, canvas.width, canvas.height);\n    this.boardContext.fillStyle = '#020617';\n    this.boardContext.fillRect(0, 0, canvas.width, canvas.height);\n\n    for (let row = 0; row < this.rows; row += 1) {\n      for (let column = 0; column < this.columns; column += 1) {\n        this.boardContext.strokeStyle = 'rgba(148, 163, 184, 0.12)';\n        this.boardContext.strokeRect(column * cellWidth, row * cellHeight, cellWidth, cellHeight);\n\n        const color = board[row][column];\n        if (!color) {\n          continue;\n        }\n\n        this.boardContext.fillStyle = color;\n        this.boardContext.fillRect(column * cellWidth + 1, row * cellHeight + 1, cellWidth - 2, cellHeight - 2);\n      }\n    }\n  }\n\n  private drawNextPiece(type: PieceType): void {\n    const definition = getPieceDefinition(type);\n    const shape = definition.rotations[0];\n    const { canvas } = this.nextPieceContext;\n    const cellSize = 24;\n    const offsetX = (canvas.width - shape[0].length * cellSize) / 2;\n    const offsetY = (canvas.height - shape.length * cellSize) / 2;\n\n    this.nextPieceContext.clearRect(0, 0, canvas.width, canvas.height);\n    this.nextPieceContext.fillStyle = '#020617';\n    this.nextPieceContext.fillRect(0, 0, canvas.width, canvas.height);\n\n    shape.forEach((row, rowIndex) => {\n      row.forEach((cell, columnIndex) => {\n        if (!cell) {\n          return;\n        }\n\n        this.nextPieceContext.fillStyle = definition.color;\n        this.nextPieceContext.fillRect(offsetX + columnIndex * cellSize, offsetY + rowIndex * cellSize, cellSize - 2, cellSize - 2);\n      });\n    });\n  }\n}","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs::constructor::SqliteHighScoreStore::SqliteHighScoreStore","name":"SqliteHighScoreStore","file_path":"samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs","entity_kind":"constructor","before_signature":null,"after_signature":"","before_source":null,"after_source":"public SqliteHighScoreStore(IConfiguration configuration, ILogger<SqliteHighScoreStore> logger)\n    {\n        _connectionString = configuration.GetConnectionString(\"HighScores\")\n            ?? throw new InvalidOperationException(\"Missing connection string 'HighScores'.\");\n        _logger = logger;\n    }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/renderer.ts::method::GameRenderer::render","name":"render","file_path":"samples/tetris-demo/frontend/src/game/renderer.ts","entity_kind":"method","before_signature":null,"after_signature":"(board: string[][], nextPieceType: PieceType)","before_source":null,"after_source":"render(board: string[][], nextPieceType: PieceType): void {\n    this.drawBoard(board);\n    this.drawNextPiece(nextPieceType);\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::method::TetrisGame::getDropInterval","name":"getDropInterval","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"method","before_signature":null,"after_signature":"()","before_source":null,"after_source":"private getDropInterval(): number {\n    return Math.max(120, 900 - (this.stateInternal.level - 1) * 70);\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::method::TetrisGame::tryMove","name":"tryMove","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"method","before_signature":null,"after_signature":"(rowDelta: number, columnDelta: number)","before_source":null,"after_source":"private tryMove(rowDelta: number, columnDelta: number): boolean {\n    const piece = this.stateInternal.currentPiece;\n    if (!piece || this.stateInternal.isPaused || this.stateInternal.isGameOver) {\n      return false;\n    }\n\n    const candidate: ActivePiece = {\n      ...piece,\n      row: piece.row + rowDelta,\n      column: piece.column + columnDelta\n    };\n\n    if (this.collides(candidate)) {\n      return false;\n    }\n\n    this.stateInternal.currentPiece = candidate;\n    return true;\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::method::TetrisGame::clearLines","name":"clearLines","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"method","before_signature":null,"after_signature":"()","before_source":null,"after_source":"private clearLines(): void {\n    const cleared: number[] = [];\n\n    this.stateInternal.board.forEach((row, index) => {\n      if (row.every(Boolean)) {\n        cleared.push(index);\n      }\n    });\n\n    if (cleared.length === 0) {\n      return;\n    }\n\n    for (const rowIndex of cleared.reverse()) {\n      this.stateInternal.board.splice(rowIndex, 1);\n      this.stateInternal.board.unshift(Array.from({ length: this.columns }, () => ''));\n    }\n\n    this.stateInternal.lines += cleared.length;\n    this.stateInternal.level = Math.floor(this.stateInternal.lines / 10) + 1;\n\n    const lineScores = [0, 100, 300, 500, 800];\n    this.stateInternal.score += lineScores[cleared.length] * this.stateInternal.level;\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/tetrominoes.ts::interface::::PieceDefinition","name":"PieceDefinition","file_path":"samples/tetris-demo/frontend/src/game/tetrominoes.ts","entity_kind":"interface","before_signature":null,"after_signature":"","before_source":null,"after_source":"interface PieceDefinition {\n  type: PieceType;\n  color: string;\n  rotations: Matrix[];\n}","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/ui/highscore-table.ts::method::HighScoreTable::render","name":"render","file_path":"samples/tetris-demo/frontend/src/ui/highscore-table.ts","entity_kind":"method","before_signature":null,"after_signature":"(scores: HighScore[])","before_source":null,"after_source":"render(scores: HighScore[]): void {\n    this.tbody.innerHTML = '';\n\n    if (scores.length === 0) {\n      const row = document.createElement('tr');\n      row.className = 'empty-row';\n      row.innerHTML = '<td colspan=\"5\">No high scores yet. Be the first.</td>';\n      this.tbody.appendChild(row);\n      return;\n    }\n\n    scores.forEach((score, index) => {\n      const row = document.createElement('tr');\n      row.innerHTML = `\n        <td>${index + 1}</td>\n        <td>${escapeHtml(score.playerName)}</td>\n        <td>${score.score.toLocaleString()}</td>\n        <td>${score.lines}</td>\n        <td>${score.level}</td>\n      `;\n      this.tbody.appendChild(row);\n    });\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs::method::SqliteHighScoreStore::GetTopScoresAsync","name":"GetTopScoresAsync","file_path":"samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs","entity_kind":"method","before_signature":null,"after_signature":"(int limit, CancellationToken cancellationToken = default)","before_source":null,"after_source":"public async Task<IReadOnlyList<HighScore>> GetTopScoresAsync(int limit, CancellationToken cancellationToken = default)\n    {\n        var results = new List<HighScore>();\n\n        await using var connection = new SqliteConnection(_connectionString);\n        await connection.OpenAsync(cancellationToken);\n\n        var command = connection.CreateCommand();\n        command.CommandText = \"\"\"\n            SELECT Id, PlayerName, Score, Lines, Level, CreatedAtUtc\n            FROM HighScores\n            ORDER BY Score DESC, CreatedAtUtc ASC\n            LIMIT $limit;\n            \"\"\";\n        command.Parameters.AddWithValue(\"$limit\", limit);\n\n        await using var reader = await command.ExecuteReaderAsync(cancellationToken);\n        while (await reader.ReadAsync(cancellationToken))\n        {\n            results.Add(new HighScore\n            {\n                Id = reader.GetInt64(0),\n                PlayerName = reader.GetString(1),\n                Score = reader.GetInt32(2),\n                Lines = reader.GetInt32(3),\n                Level = reader.GetInt32(4),\n                CreatedAtUtc = DateTime.Parse(reader.GetString(5)).ToUniversalTime()\n            });\n        }\n\n        return results;\n    }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::property::TetrisGame::stateInternal","name":"stateInternal","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"property","before_signature":null,"after_signature":"","before_source":null,"after_source":"private readonly stateInternal: GameState","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs::method::SqliteHighScoreStore::InitializeAsync","name":"InitializeAsync","file_path":"samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs","entity_kind":"method","before_signature":null,"after_signature":"(CancellationToken cancellationToken = default)","before_source":null,"after_source":"public async Task InitializeAsync(CancellationToken cancellationToken = default)\n    {\n        var builder = new SqliteConnectionStringBuilder(_connectionString);\n        var dataSource = builder.DataSource;\n\n        if (!string.IsNullOrWhiteSpace(dataSource))\n        {\n            var fullPath = Path.IsPathRooted(dataSource)\n                ? dataSource\n                : Path.Combine(AppContext.BaseDirectory, dataSource);\n            var directory = Path.GetDirectoryName(fullPath);\n\n            if (!string.IsNullOrWhiteSpace(directory))\n            {\n                Directory.CreateDirectory(directory);\n            }\n        }\n\n        await using var connection = new SqliteConnection(_connectionString);\n        await connection.OpenAsync(cancellationToken);\n\n        var command = connection.CreateCommand();\n        command.CommandText = \"\"\"\n            CREATE TABLE IF NOT EXISTS HighScores (\n                Id INTEGER PRIMARY KEY AUTOINCREMENT,\n                PlayerName TEXT NOT NULL,\n                Score INTEGER NOT NULL,\n                Lines INTEGER NOT NULL,\n                Level INTEGER NOT NULL,\n                CreatedAtUtc TEXT NOT NULL\n            );\n            CREATE INDEX IF NOT EXISTS IX_HighScores_Score ON HighScores (Score DESC, CreatedAtUtc ASC);\n            \"\"\";\n\n        await command.ExecuteNonQueryAsync(cancellationToken);\n        _logger.LogInformation(\"SQLite high score store initialized.\");\n    }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::interface::::GameState","name":"GameState","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"interface","before_signature":null,"after_signature":"","before_source":null,"after_source":"interface GameState {\n  board: string[][];\n  currentPiece: ActivePiece | null;\n  nextPieceType: PieceType;\n  score: number;\n  lines: number;\n  level: number;\n  isGameOver: boolean;\n  isPaused: boolean;\n}","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::method::TetrisGame::moveLeft","name":"moveLeft","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"method","before_signature":null,"after_signature":"()","before_source":null,"after_source":"moveLeft(): void {\n    this.tryMove(0, -1);\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::method::TetrisGame::update","name":"update","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"method","before_signature":null,"after_signature":"(deltaMs: number)","before_source":null,"after_source":"update(deltaMs: number): void {\n    if (this.stateInternal.isGameOver || this.stateInternal.isPaused) {\n      return;\n    }\n\n    this.dropAccumulator += deltaMs;\n    if (this.dropAccumulator >= this.getDropInterval()) {\n      this.dropAccumulator = 0;\n      this.stepDown();\n    }\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::method::TetrisGame::stepDown","name":"stepDown","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"method","before_signature":null,"after_signature":"()","before_source":null,"after_source":"private stepDown(): boolean {\n    if (!this.tryMove(1, 0)) {\n      this.lockPiece();\n      return false;\n    }\n    return true;\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/backend/TetrisDemo.Api/Services/ScoreValidator.cs::class::::ScoreValidator","name":"ScoreValidator","file_path":"samples/tetris-demo/backend/TetrisDemo.Api/Services/ScoreValidator.cs","entity_kind":"class","before_signature":null,"after_signature":"ScoreValidator","before_source":null,"after_source":"public static class ScoreValidator\n{\n    public static bool IsPlausible(SubmitHighScoreRequest request)\n    {\n        if (string.IsNullOrWhiteSpace(request.PlayerName))\n        {\n            return false;\n        }\n\n        if (request.Score < 0 || request.Lines < 0 || request.Level < 1)\n        {\n            return false;\n        }\n\n        var roughMinimum = request.Lines * 40;\n        var roughMaximum = Math.Max(100_000, request.Lines * 3_000 + request.Level * 5_000);\n\n        return request.Score >= roughMinimum && request.Score <= roughMaximum;\n    }\n}","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::method::TetrisGame::reset","name":"reset","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"method","before_signature":null,"after_signature":"()","before_source":null,"after_source":"reset(): void {\n    const fresh = this.createInitialState();\n    this.stateInternal.board = fresh.board;\n    this.stateInternal.currentPiece = fresh.currentPiece;\n    this.stateInternal.nextPieceType = fresh.nextPieceType;\n    this.stateInternal.score = fresh.score;\n    this.stateInternal.lines = fresh.lines;\n    this.stateInternal.level = fresh.level;\n    this.stateInternal.isGameOver = fresh.isGameOver;\n    this.stateInternal.isPaused = fresh.isPaused;\n    this.dropAccumulator = 0;\n    this.spawnNextPiece();\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScoreResponse.cs::class::::HighScoreResponse","name":"HighScoreResponse","file_path":"samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScoreResponse.cs","entity_kind":"class","before_signature":null,"after_signature":"HighScoreResponse","before_source":null,"after_source":"public sealed class HighScoreResponse\n{\n    public IReadOnlyList<HighScore> Items { get; init; } = Array.Empty<HighScore>();\n}","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs::class::::SubmitHighScoreRequest","name":"SubmitHighScoreRequest","file_path":"samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs","entity_kind":"class","before_signature":null,"after_signature":"SubmitHighScoreRequest","before_source":null,"after_source":"public sealed class SubmitHighScoreRequest\n{\n    [Required]\n    [StringLength(24, MinimumLength = 1)]\n    public string PlayerName { get; init; } = string.Empty;\n\n    [Range(0, 10_000_000)]\n    public int Score { get; init; }\n\n    [Range(0, 10_000)]\n    public int Lines { get; init; }\n\n    [Range(1, 99)]\n    public int Level { get; init; }\n}","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs::class::::HighScore","name":"HighScore","file_path":"samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs","entity_kind":"class","before_signature":null,"after_signature":"HighScore","before_source":null,"after_source":"public sealed class HighScore\n{\n    public long Id { get; init; }\n    public string PlayerName { get; init; } = string.Empty;\n    public int Score { get; init; }\n    public int Lines { get; init; }\n    public int Level { get; init; }\n    public DateTime CreatedAtUtc { get; init; }\n}","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::property::TetrisGame::columns","name":"columns","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"property","before_signature":null,"after_signature":"","before_source":null,"after_source":"readonly columns = 10","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/ui/highscore-table.ts::method::HighScoreTable::renderError","name":"renderError","file_path":"samples/tetris-demo/frontend/src/ui/highscore-table.ts","entity_kind":"method","before_signature":null,"after_signature":"(message: string)","before_source":null,"after_source":"renderError(message: string): void {\n    this.tbody.innerHTML = '';\n    const row = document.createElement('tr');\n    row.className = 'error-row';\n    row.innerHTML = `<td colspan=\"5\">${escapeHtml(message)}</td>`;\n    this.tbody.appendChild(row);\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/renderer.ts::method::GameRenderer::drawBoard","name":"drawBoard","file_path":"samples/tetris-demo/frontend/src/game/renderer.ts","entity_kind":"method","before_signature":null,"after_signature":"(board: string[][])","before_source":null,"after_source":"private drawBoard(board: string[][]): void {\n    const { canvas } = this.boardContext;\n    const cellWidth = canvas.width / this.columns;\n    const cellHeight = canvas.height / this.rows;\n\n    this.boardContext.clearRect(0, 0, canvas.width, canvas.height);\n    this.boardContext.fillStyle = '#020617';\n    this.boardContext.fillRect(0, 0, canvas.width, canvas.height);\n\n    for (let row = 0; row < this.rows; row += 1) {\n      for (let column = 0; column < this.columns; column += 1) {\n        this.boardContext.strokeStyle = 'rgba(148, 163, 184, 0.12)';\n        this.boardContext.strokeRect(column * cellWidth, row * cellHeight, cellWidth, cellHeight);\n\n        const color = board[row][column];\n        if (!color) {\n          continue;\n        }\n\n        this.boardContext.fillStyle = color;\n        this.boardContext.fillRect(column * cellWidth + 1, row * cellHeight + 1, cellWidth - 2, cellHeight - 2);\n      }\n    }\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/backend/TetrisDemo.Api/Services/ScoreValidator.cs::method::ScoreValidator::IsPlausible","name":"IsPlausible","file_path":"samples/tetris-demo/backend/TetrisDemo.Api/Services/ScoreValidator.cs","entity_kind":"method","before_signature":null,"after_signature":"(SubmitHighScoreRequest request)","before_source":null,"after_source":"public static bool IsPlausible(SubmitHighScoreRequest request)\n    {\n        if (string.IsNullOrWhiteSpace(request.PlayerName))\n        {\n            return false;\n        }\n\n        if (request.Score < 0 || request.Lines < 0 || request.Level < 1)\n        {\n            return false;\n        }\n\n        var roughMinimum = request.Lines * 40;\n        var roughMaximum = Math.Max(100_000, request.Lines * 3_000 + request.Level * 5_000);\n\n        return request.Score >= roughMinimum && request.Score <= roughMaximum;\n    }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::method::TetrisGame::collides","name":"collides","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"method","before_signature":null,"after_signature":"(piece: ActivePiece)","before_source":null,"after_source":"private collides(piece: ActivePiece): boolean {\n    const definition = getPieceDefinition(piece.type);\n    const shape: Matrix = definition.rotations[piece.rotation];\n\n    return shape.some((row, rowIndex) =>\n      row.some((cell, columnIndex) => {\n        if (!cell) {\n          return false;\n        }\n\n        const boardRow = piece.row + rowIndex;\n        const boardColumn = piece.column + columnIndex;\n\n        if (boardColumn < 0 || boardColumn >= this.columns || boardRow >= this.rows) {\n          return true;\n        }\n\n        if (boardRow < 0) {\n          return false;\n        }\n\n        return Boolean(this.stateInternal.board[boardRow][boardColumn]);\n      })\n    );\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::property::TetrisGame::rows","name":"rows","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"property","before_signature":null,"after_signature":"","before_source":null,"after_source":"readonly rows = 20","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::class::::TetrisGame","name":"TetrisGame","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"class","before_signature":null,"after_signature":"TetrisGame","before_source":null,"after_source":"class TetrisGame {\n  readonly rows = 20;\n  readonly columns = 10;\n  private dropAccumulator = 0;\n  private readonly stateInternal: GameState;\n\n  constructor() {\n    this.stateInternal = this.createInitialState();\n  }\n\n  get state(): GameState {\n    return {\n      ...this.stateInternal,\n      board: this.stateInternal.board.map((row) => [...row]),\n      currentPiece: this.stateInternal.currentPiece ? { ...this.stateInternal.currentPiece } : null\n    };\n  }\n\n  reset(): void {\n    const fresh = this.createInitialState();\n    this.stateInternal.board = fresh.board;\n    this.stateInternal.currentPiece = fresh.currentPiece;\n    this.stateInternal.nextPieceType = fresh.nextPieceType;\n    this.stateInternal.score = fresh.score;\n    this.stateInternal.lines = fresh.lines;\n    this.stateInternal.level = fresh.level;\n    this.stateInternal.isGameOver = fresh.isGameOver;\n    this.stateInternal.isPaused = fresh.isPaused;\n    this.dropAccumulator = 0;\n    this.spawnNextPiece();\n  }\n\n  update(deltaMs: number): void {\n    if (this.stateInternal.isGameOver || this.stateInternal.isPaused) {\n      return;\n    }\n\n    this.dropAccumulator += deltaMs;\n    if (this.dropAccumulator >= this.getDropInterval()) {\n      this.dropAccumulator = 0;\n      this.stepDown();\n    }\n  }\n\n  togglePause(): void {\n    if (this.stateInternal.isGameOver) {\n      return;\n    }\n    this.stateInternal.isPaused = !this.stateInternal.isPaused;\n  }\n\n  moveLeft(): void {\n    this.tryMove(0, -1);\n  }\n\n  moveRight(): void {\n    this.tryMove(0, 1);\n  }\n\n  softDrop(): void {\n    if (this.stepDown()) {\n      this.stateInternal.score += 1;\n    }\n  }\n\n  hardDrop(): void {\n    if (!this.stateInternal.currentPiece || this.stateInternal.isPaused || this.stateInternal.isGameOver) {\n      return;\n    }\n\n    let droppedRows = 0;\n    while (this.tryMove(1, 0)) {\n      droppedRows += 1;\n    }\n\n    this.stateInternal.score += droppedRows * 2;\n    this.lockPiece();\n  }\n\n  rotate(): void {\n    const piece = this.stateInternal.currentPiece;\n    if (!piece || this.stateInternal.isPaused || this.stateInternal.isGameOver) {\n      return;\n    }\n\n    const candidate = { ...piece, rotation: (piece.rotation + 1) % 4 };\n    const kicks = [0, -1, 1, -2, 2];\n\n    for (const kick of kicks) {\n      const shifted = { ...candidate, column: candidate.column + kick };\n      if (!this.collides(shifted)) {\n        this.stateInternal.currentPiece = shifted;\n        return;\n      }\n    }\n  }\n\n  getMergedBoard(): string[][] {\n    const merged = this.stateInternal.board.map((row) => [...row]);\n    const piece = this.stateInternal.currentPiece;\n\n    if (!piece) {\n      return merged;\n    }\n\n    const definition = getPieceDefinition(piece.type);\n    const shape = definition.rotations[piece.rotation];\n\n    shape.forEach((row, rowIndex) => {\n      row.forEach((cell, columnIndex) => {\n        if (!cell) {\n          return;\n        }\n\n        const targetRow = piece.row + rowIndex;\n        const targetColumn = piece.column + columnIndex;\n        if (targetRow >= 0 && targetRow < this.rows && targetColumn >= 0 && targetColumn < this.columns) {\n          merged[targetRow][targetColumn] = definition.color;\n        }\n      });\n    });\n\n    return merged;\n  }\n\n  private createInitialState(): GameState {\n    return {\n      board: Array.from({ length: this.rows }, () => Array.from({ length: this.columns }, () => '')),\n      currentPiece: null,\n      nextPieceType: randomPieceType(),\n      score: 0,\n      lines: 0,\n      level: 1,\n      isGameOver: false,\n      isPaused: false\n    };\n  }\n\n  private getDropInterval(): number {\n    return Math.max(120, 900 - (this.stateInternal.level - 1) * 70);\n  }\n\n  private stepDown(): boolean {\n    if (!this.tryMove(1, 0)) {\n      this.lockPiece();\n      return false;\n    }\n    return true;\n  }\n\n  private tryMove(rowDelta: number, columnDelta: number): boolean {\n    const piece = this.stateInternal.currentPiece;\n    if (!piece || this.stateInternal.isPaused || this.stateInternal.isGameOver) {\n      return false;\n    }\n\n    const candidate: ActivePiece = {\n      ...piece,\n      row: piece.row + rowDelta,\n      column: piece.column + columnDelta\n    };\n\n    if (this.collides(candidate)) {\n      return false;\n    }\n\n    this.stateInternal.currentPiece = candidate;\n    return true;\n  }\n\n  private lockPiece(): void {\n    const piece = this.stateInternal.currentPiece;\n    if (!piece) {\n      return;\n    }\n\n    const definition = getPieceDefinition(piece.type);\n    const shape = definition.rotations[piece.rotation];\n\n    shape.forEach((row, rowIndex) => {\n      row.forEach((cell, columnIndex) => {\n        if (!cell) {\n          return;\n        }\n\n        const boardRow = piece.row + rowIndex;\n        const boardColumn = piece.column + columnIndex;\n        if (boardRow >= 0) {\n          this.stateInternal.board[boardRow][boardColumn] = definition.color;\n        }\n      });\n    });\n\n    this.clearLines();\n    this.spawnNextPiece();\n  }\n\n  private clearLines(): void {\n    const cleared: number[] = [];\n\n    this.stateInternal.board.forEach((row, index) => {\n      if (row.every(Boolean)) {\n        cleared.push(index);\n      }\n    });\n\n    if (cleared.length === 0) {\n      return;\n    }\n\n    for (const rowIndex of cleared.reverse()) {\n      this.stateInternal.board.splice(rowIndex, 1);\n      this.stateInternal.board.unshift(Array.from({ length: this.columns }, () => ''));\n    }\n\n    this.stateInternal.lines += cleared.length;\n    this.stateInternal.level = Math.floor(this.stateInternal.lines / 10) + 1;\n\n    const lineScores = [0, 100, 300, 500, 800];\n    this.stateInternal.score += lineScores[cleared.length] * this.stateInternal.level;\n  }\n\n  private spawnNextPiece(): void {\n    const type = this.stateInternal.nextPieceType;\n    this.stateInternal.nextPieceType = randomPieceType();\n\n    const definition = getPieceDefinition(type);\n    const shape = definition.rotations[0];\n    const spawnColumn = Math.floor((this.columns - shape[0].length) / 2);\n    const spawnPiece: ActivePiece = {\n      type,\n      rotation: 0,\n      row: 0,\n      column: spawnColumn\n    };\n\n    if (this.collides(spawnPiece)) {\n      this.stateInternal.currentPiece = null;\n      this.stateInternal.isGameOver = true;\n      return;\n    }\n\n    this.stateInternal.currentPiece = spawnPiece;\n  }\n\n  private collides(piece: ActivePiece): boolean {\n    const definition = getPieceDefinition(piece.type);\n    const shape: Matrix = definition.rotations[piece.rotation];\n\n    return shape.some((row, rowIndex) =>\n      row.some((cell, columnIndex) => {\n        if (!cell) {\n          return false;\n        }\n\n        const boardRow = piece.row + rowIndex;\n        const boardColumn = piece.column + columnIndex;\n\n        if (boardColumn < 0 || boardColumn >= this.columns || boardRow >= this.rows) {\n          return true;\n        }\n\n        if (boardRow < 0) {\n          return false;\n        }\n\n        return Boolean(this.stateInternal.board[boardRow][boardColumn]);\n      })\n    );\n  }\n}","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::constructor::TetrisGame::constructor","name":"constructor","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"constructor","before_signature":null,"after_signature":"()","before_source":null,"after_source":"constructor() {\n    this.stateInternal = this.createInitialState();\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/ui/highscore-table.ts::class::::HighScoreTable","name":"HighScoreTable","file_path":"samples/tetris-demo/frontend/src/ui/highscore-table.ts","entity_kind":"class","before_signature":null,"after_signature":"HighScoreTable","before_source":null,"after_source":"class HighScoreTable {\n  constructor(private readonly tbody: HTMLTableSectionElement) {}\n\n  render(scores: HighScore[]): void {\n    this.tbody.innerHTML = '';\n\n    if (scores.length === 0) {\n      const row = document.createElement('tr');\n      row.className = 'empty-row';\n      row.innerHTML = '<td colspan=\"5\">No high scores yet. Be the first.</td>';\n      this.tbody.appendChild(row);\n      return;\n    }\n\n    scores.forEach((score, index) => {\n      const row = document.createElement('tr');\n      row.innerHTML = `\n        <td>${index + 1}</td>\n        <td>${escapeHtml(score.playerName)}</td>\n        <td>${score.score.toLocaleString()}</td>\n        <td>${score.lines}</td>\n        <td>${score.level}</td>\n      `;\n      this.tbody.appendChild(row);\n    });\n  }\n\n  renderError(message: string): void {\n    this.tbody.innerHTML = '';\n    const row = document.createElement('tr');\n    row.className = 'error-row';\n    row.innerHTML = `<td colspan=\"5\">${escapeHtml(message)}</td>`;\n    this.tbody.appendChild(row);\n  }\n}","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::method::TetrisGame::getMergedBoard","name":"getMergedBoard","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"method","before_signature":null,"after_signature":"()","before_source":null,"after_source":"getMergedBoard(): string[][] {\n    const merged = this.stateInternal.board.map((row) => [...row]);\n    const piece = this.stateInternal.currentPiece;\n\n    if (!piece) {\n      return merged;\n    }\n\n    const definition = getPieceDefinition(piece.type);\n    const shape = definition.rotations[piece.rotation];\n\n    shape.forEach((row, rowIndex) => {\n      row.forEach((cell, columnIndex) => {\n        if (!cell) {\n          return;\n        }\n\n        const targetRow = piece.row + rowIndex;\n        const targetColumn = piece.column + columnIndex;\n        if (targetRow >= 0 && targetRow < this.rows && targetColumn >= 0 && targetColumn < this.columns) {\n          merged[targetRow][targetColumn] = definition.color;\n        }\n      });\n    });\n\n    return merged;\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::method::TetrisGame::state","name":"state","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"method","before_signature":null,"after_signature":"()","before_source":null,"after_source":"get state(): GameState {\n    return {\n      ...this.stateInternal,\n      board: this.stateInternal.board.map((row) => [...row]),\n      currentPiece: this.stateInternal.currentPiece ? { ...this.stateInternal.currentPiece } : null\n    };\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/renderer.ts::constructor::GameRenderer::constructor","name":"constructor","file_path":"samples/tetris-demo/frontend/src/game/renderer.ts","entity_kind":"constructor","before_signature":null,"after_signature":"(\n    private readonly boardContext: CanvasRenderingContext2D,\n    private readonly nextPieceContext: CanvasRenderingContext2D,\n    private readonly rows: number,\n    private readonly columns: number\n  )","before_source":null,"after_source":"constructor(\n    private readonly boardContext: CanvasRenderingContext2D,\n    private readonly nextPieceContext: CanvasRenderingContext2D,\n    private readonly rows: number,\n    private readonly columns: number\n  ) {}","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::method::TetrisGame::rotate","name":"rotate","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"method","before_signature":null,"after_signature":"()","before_source":null,"after_source":"rotate(): void {\n    const piece = this.stateInternal.currentPiece;\n    if (!piece || this.stateInternal.isPaused || this.stateInternal.isGameOver) {\n      return;\n    }\n\n    const candidate = { ...piece, rotation: (piece.rotation + 1) % 4 };\n    const kicks = [0, -1, 1, -2, 2];\n\n    for (const kick of kicks) {\n      const shifted = { ...candidate, column: candidate.column + kick };\n      if (!this.collides(shifted)) {\n        this.stateInternal.currentPiece = shifted;\n        return;\n      }\n    }\n  }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs::method::SqliteHighScoreStore::InsertAsync","name":"InsertAsync","file_path":"samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs","entity_kind":"method","before_signature":null,"after_signature":"(SubmitHighScoreRequest request, CancellationToken cancellationToken = default)","before_source":null,"after_source":"public async Task<HighScore> InsertAsync(SubmitHighScoreRequest request, CancellationToken cancellationToken = default)\n    {\n        var createdAtUtc = DateTime.UtcNow;\n\n        await using var connection = new SqliteConnection(_connectionString);\n        await connection.OpenAsync(cancellationToken);\n\n        var command = connection.CreateCommand();\n        command.CommandText = \"\"\"\n            INSERT INTO HighScores (PlayerName, Score, Lines, Level, CreatedAtUtc)\n            VALUES ($playerName, $score, $lines, $level, $createdAtUtc);\n            SELECT last_insert_rowid();\n            \"\"\";\n        command.Parameters.AddWithValue(\"$playerName\", request.PlayerName.Trim());\n        command.Parameters.AddWithValue(\"$score\", request.Score);\n        command.Parameters.AddWithValue(\"$lines\", request.Lines);\n        command.Parameters.AddWithValue(\"$level\", request.Level);\n        command.Parameters.AddWithValue(\"$createdAtUtc\", createdAtUtc.ToString(\"O\"));\n\n        var id = (long)(await command.ExecuteScalarAsync(cancellationToken)\n            ?? throw new InvalidOperationException(\"Failed to insert high score.\"));\n\n        return new HighScore\n        {\n            Id = id,\n            PlayerName = request.PlayerName.Trim(),\n            Score = request.Score,\n            Lines = request.Lines,\n            Level = request.Level,\n            CreatedAtUtc = createdAtUtc\n        };\n    }","old_file_path":null,"old_name":null},{"kind":"added","entity_key":"samples/tetris-demo/frontend/src/game/engine.ts::method::TetrisGame::softDrop","name":"softDrop","file_path":"samples/tetris-demo/frontend/src/game/engine.ts","entity_kind":"method","before_signature":null,"after_signature":"()","before_source":null,"after_source":"softDrop(): void {\n    if (this.stepDown()) {\n      this.stateInternal.score += 1;\n    }\n  }","old_file_path":null,"old_name":null}],"files_affected":["samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs","samples/tetris-demo/frontend/src/api/highscores.ts","samples/tetris-demo/frontend/src/main.ts","samples/tetris-demo/backend/TetrisDemo.Api/Services/ScoreValidator.cs","samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScoreResponse.cs","samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs","samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs","samples/tetris-demo/frontend/src/game/engine.ts","samples/tetris-demo/frontend/src/game/tetrominoes.ts","samples/tetris-demo/frontend/src/ui/highscore-table.ts","samples/tetris-demo/frontend/src/game/renderer.ts"],"summary":null}</script>
+<script>
+(function () {
+  var raw = document.getElementById('structix-data').textContent;
+  var manifest = JSON.parse(raw);
+
+  renderHeader(manifest);
+  renderSidebar(manifest);
+  renderMainPanel(manifest, null);
+  renderFlowDiagram(manifest);
+  renderStatsBar(manifest);
+
+  // ── Header ────────────────────────────────────────────────────────────────
+  function renderHeader(m) {
+    document.getElementById('ref-range').textContent = m.from_ref + ' \u2192 ' + m.to_ref;
+    document.title = 'Structix: ' + m.from_ref + ' \u2192 ' + m.to_ref;
+    var counts = countByKind(m.changes);
+    var pillRow = document.getElementById('pill-row');
+    ['added','removed','modified','moved','renamed'].forEach(function(k) {
+      if (!counts[k]) return;
+      var span = document.createElement('span');
+      span.className = 'pill pill-' + k;
+      span.textContent = capitalize(k) + ' ' + counts[k];
+      pillRow.appendChild(span);
+    });
+  }
+
+  // ── Sidebar ───────────────────────────────────────────────────────────────
+  function renderSidebar(m) {
+    var allEl = document.getElementById('sidebar-all');
+    document.getElementById('sidebar-all-count').textContent = m.changes.length;
+    allEl.addEventListener('click', function() {
+      setActiveFile(null);
+      renderMainPanel(m, null);
+    });
+
+    var fileCounts = {};
+    m.changes.forEach(function(c) {
+      [c.file_path, c.old_file_path].forEach(function(f) {
+        if (!f) return;
+        fileCounts[f] = (fileCounts[f] || 0) + 1;
+      });
+    });
+
+    var tree = document.getElementById('file-tree');
+    Object.keys(fileCounts).sort().forEach(function(file) {
+      var div = document.createElement('div');
+      div.className = 'file-entry';
+      div.dataset.file = file;
+      div.innerHTML =
+        '<span class="file-name" title="' + escHtml(file) + '">' + escHtml(shortPath(file)) + '</span>' +
+        '<span class="file-badge">' + fileCounts[file] + '</span>';
+      div.addEventListener('click', function() {
+        setActiveFile(file);
+        renderMainPanel(m, file);
+      });
+      tree.appendChild(div);
+    });
+  }
+
+  function setActiveFile(file) {
+    var allEl = document.getElementById('sidebar-all');
+    allEl.classList.toggle('active', file === null);
+    document.querySelectorAll('#file-tree .file-entry').forEach(function(el) {
+      el.classList.toggle('active', el.dataset.file === file);
+    });
+  }
+
+  // ── Main panel ────────────────────────────────────────────────────────────
+  function renderMainPanel(m, fileFilter) {
+    var panel = document.getElementById('main-panel');
+    panel.innerHTML = '';
+
+    var byFile = groupByFile(m.changes, fileFilter);
+    var files = Object.keys(byFile).sort();
+
+    if (files.length === 0) {
+      panel.innerHTML = '<div class="empty-state">No changes match the current filter.</div>';
+      return;
+    }
+
+    files.forEach(function(file) {
+      var hdr = document.createElement('div');
+      hdr.className = 'file-group-header';
+      hdr.textContent = file;
+      panel.appendChild(hdr);
+
+      byFile[file].forEach(function(change) {
+        panel.appendChild(buildEntityCard(change));
+      });
+    });
+  }
+
+  function groupByFile(changes, fileFilter) {
+    var out = {};
+    changes.forEach(function(c) {
+      if (fileFilter && c.file_path !== fileFilter && c.old_file_path !== fileFilter) return;
+      if (!out[c.file_path]) out[c.file_path] = [];
+      out[c.file_path].push(c);
+    });
+    return out;
+  }
+
+  // ── Entity card ───────────────────────────────────────────────────────────
+  function buildEntityCard(change) {
+    var card = document.createElement('div');
+    card.className = 'entity-card';
+    card.dataset.kind = change.kind;
+
+    var hdr = document.createElement('div');
+    hdr.className = 'card-header';
+    hdr.innerHTML =
+      '<span class="entity-badge">' + kindIcon(change.entity_kind) + '</span>' +
+      '<span class="entity-name">' + escHtml(change.name) + '</span>' +
+      '<span class="entity-kind-tag">' + escHtml(change.entity_kind) + '</span>' +
+      '<span class="change-kind-tag">' + change.kind + '</span>';
+
+    var detail = document.createElement('div');
+    detail.className = 'card-detail';
+    detail.innerHTML = '<div class="detail-divider"></div>' + buildDetail(change);
+
+    hdr.addEventListener('click', function() {
+      card.classList.toggle('expanded');
+    });
+
+    card.appendChild(hdr);
+    card.appendChild(detail);
+    return card;
+  }
+
+  function buildDetail(c) {
+    var html = '';
+    if (c.kind === 'modified') {
+      var sigChanged = c.before_signature && c.after_signature && c.before_signature !== c.after_signature;
+      if (sigChanged) {
+        html += '<div class="sig-row sig-before">\u2212 ' + escHtml(c.before_signature) + '</div>';
+        html += '<div class="sig-row sig-after">+ ' + escHtml(c.after_signature) + '</div>';
+      }
+      if (c.before_source) {
+        html += '<div class="source-label">Before</div><div class="source-block">' + escHtml(c.before_source) + '</div>';
+      }
+      if (c.after_source) {
+        html += '<div class="source-label">After</div><div class="source-block">' + escHtml(c.after_source) + '</div>';
+      }
+    } else if (c.kind === 'moved') {
+      html += '<div class="path-row"><span class="path-old">' + escHtml(c.old_file_path || '') + '</span>' +
+              '<span class="path-arrow">\u2192</span>' +
+              '<span class="path-new">' + escHtml(c.file_path) + '</span></div>';
+      if (c.after_source) {
+        html += '<div class="source-block">' + escHtml(c.after_source) + '</div>';
+      }
+    } else if (c.kind === 'renamed') {
+      html += '<div class="path-row"><span class="path-old">' + escHtml(c.old_name || '') + '</span>' +
+              '<span class="path-arrow">\u2192</span>' +
+              '<span class="path-new">' + escHtml(c.name) + '</span></div>';
+      var sigChanged = c.before_signature && c.after_signature && c.before_signature !== c.after_signature;
+      if (sigChanged) {
+        html += '<div class="sig-row sig-before">\u2212 ' + escHtml(c.before_signature) + '</div>';
+        html += '<div class="sig-row sig-after">+ ' + escHtml(c.after_signature) + '</div>';
+      }
+      if (c.after_source) {
+        html += '<div class="source-block">' + escHtml(c.after_source) + '</div>';
+      }
+    } else {
+      var src = c.after_source || c.before_source;
+      if (src) html += '<div class="source-block">' + escHtml(src) + '</div>';
+    }
+    return html || '<span style="color:var(--color-muted);font-size:0.8rem">No detail available.</span>';
+  }
+
+  // ── Flow diagram ──────────────────────────────────────────────────────────
+  function renderFlowDiagram(m) {
+    var svg = document.getElementById('flow-svg');
+    var moved = m.changes.filter(function(c) { return c.kind === 'moved'; });
+
+    if (moved.length === 0) {
+      svg.innerHTML = '<text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" ' +
+        'fill="#475569" font-family="system-ui,sans-serif" font-size="12">No moved entities</text>';
+      return;
+    }
+
+    var W = svg.clientWidth || 240;
+    var BAR_H = 22;
+    var GAP = 8;
+    var BAR_W = Math.min(100, Math.floor((W - 40) / 2));
+    var MID_X = W / 2;
+
+    var srcFiles = unique(moved.map(function(c) { return c.old_file_path; }));
+    var dstFiles = unique(moved.map(function(c) { return c.file_path; }));
+
+    var srcPos = {};
+    var dstPos = {};
+    srcFiles.forEach(function(f, i) { srcPos[f] = 40 + i * (BAR_H + GAP) + BAR_H / 2; });
+    dstFiles.forEach(function(f, i) { dstPos[f] = 40 + i * (BAR_H + GAP) + BAR_H / 2; });
+
+    var totalH = Math.max(
+      srcFiles.length * (BAR_H + GAP) + 50,
+      dstFiles.length * (BAR_H + GAP) + 50
+    );
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + totalH);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMin meet');
+
+    var svgNS = 'http://www.w3.org/2000/svg';
+    function el(tag, attrs, title) {
+      var e = document.createElementNS(svgNS, tag);
+      Object.keys(attrs).forEach(function(k) { e.setAttribute(k, attrs[k]); });
+      if (title) {
+        var t = document.createElementNS(svgNS, 'title');
+        t.textContent = title;
+        e.appendChild(t);
+      }
+      return e;
+    }
+
+    var srcX = 4;
+    var dstX = W - BAR_W - 4;
+
+    // Source bars
+    srcFiles.forEach(function(f) {
+      var cy = srcPos[f];
+      svg.appendChild(el('rect', { x: srcX, y: cy - BAR_H/2, width: BAR_W, height: BAR_H, rx: 3,
+        fill: '#1e293b', stroke: '#334155', 'stroke-width': 1 }));
+      var t = el('text', { x: srcX + 5, y: cy + 4,
+        fill: '#94a3b8', 'font-size': 10, 'font-family': 'system-ui,sans-serif',
+        'clip-path': 'inset(0 0 0 0)' });
+      t.textContent = shortPath(f);
+      svg.appendChild(t);
+    });
+
+    // Destination bars
+    dstFiles.forEach(function(f) {
+      var cy = dstPos[f];
+      svg.appendChild(el('rect', { x: dstX, y: cy - BAR_H/2, width: BAR_W, height: BAR_H, rx: 3,
+        fill: '#1e293b', stroke: '#334155', 'stroke-width': 1 }));
+      var t = el('text', { x: dstX + 5, y: cy + 4,
+        fill: '#94a3b8', 'font-size': 10, 'font-family': 'system-ui,sans-serif' });
+      t.textContent = shortPath(f);
+      svg.appendChild(t);
+    });
+
+    // Bezier arcs
+    moved.forEach(function(c) {
+      var y1 = srcPos[c.old_file_path];
+      var y2 = dstPos[c.file_path];
+      var x1 = srcX + BAR_W;
+      var x2 = dstX;
+      var cx = (x1 + x2) / 2;
+      var path = el('path', {
+        d: 'M' + x1 + ',' + y1 + ' C' + cx + ',' + y1 + ' ' + cx + ',' + y2 + ' ' + x2 + ',' + y2,
+        fill: 'none', stroke: '#3b82f6', 'stroke-width': 1.5, opacity: 0.65
+      }, c.name);
+      path.addEventListener('mouseenter', function() {
+        path.setAttribute('stroke-width', 2.5);
+        path.setAttribute('opacity', 1);
+      });
+      path.addEventListener('mouseleave', function() {
+        path.setAttribute('stroke-width', 1.5);
+        path.setAttribute('opacity', 0.65);
+      });
+      svg.appendChild(path);
+    });
+  }
+
+  // ── Stats bar ─────────────────────────────────────────────────────────────
+  function renderStatsBar(m) {
+    var total = m.changes.length;
+    var files = m.files_affected.length;
+    var parts = [total + ' change' + (total !== 1 ? 's' : ''), files + ' file' + (files !== 1 ? 's' : '') + ' affected'];
+    if (m.summary) parts.push(m.summary);
+    document.getElementById('stats-summary').textContent = parts.join(' \u00b7 ');
+  }
+
+  // ── Utilities ─────────────────────────────────────────────────────────────
+  function countByKind(changes) {
+    var counts = {};
+    changes.forEach(function(c) { counts[c.kind] = (counts[c.kind] || 0) + 1; });
+    return counts;
+  }
+  function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function shortPath(p) {
+    if (!p) return '';
+    var parts = p.replace(/\\/g, '/').split('/');
+    return parts.length <= 2 ? p : parts.slice(-2).join('/');
+  }
+  function escHtml(s) {
+    if (!s) return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function kindIcon(k) {
+    var icons = { 'function':'fn','method':'fn','class':'cls','interface':'ifc',
+                  'enum':'enum','property':'prop','constructor':'ctor' };
+    return icons[k] || k.slice(0,3);
+  }
+  function unique(arr) {
+    var seen = {};
+    return arr.filter(function(x) { if (!x || seen[x]) return false; seen[x] = true; return true; });
+  }
+})();
+</script>
+</body>
+</html>

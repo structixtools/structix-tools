@@ -1,0 +1,159 @@
+## Risk
+- risk 20%: Added API `SqliteHighScoreStore` — exported `SqliteHighScoreStore` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs
+- risk 20%: Added API `SqliteHighScoreStore` — exported `SqliteHighScoreStore` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs
+- risk 20%: Added API `InitializeAsync` — exported `InitializeAsync` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs
+- risk 20%: Added API `GetTopScoresAsync` — exported `GetTopScoresAsync` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs
+- risk 20%: Added API `InsertAsync` — exported `InsertAsync` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs
+
+# Change Report
+
+Detected 10 added files, 2 modified files, 33 symbol changes, and 32 api changes.
+
+## Highlights
+
+## Symbol Changes
+- Added symbol `SqliteHighScoreStore`: samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs now defines `SqliteHighScoreStore` (Class)
+- Added symbol `SqliteHighScoreStore`: samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs now defines `SqliteHighScoreStore` (Constructor)
+- Added symbol `InitializeAsync`: samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs now defines `InitializeAsync` (Method)
+- Added symbol `GetTopScoresAsync`: samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs now defines `GetTopScoresAsync` (Method)
+- Added symbol `InsertAsync`: samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs now defines `InsertAsync` (Method)
+- Added symbol `HighScore`: samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs now defines `HighScore` (Class)
+- Added symbol `Id`: samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs now defines `Id` (Property)
+- Added symbol `PlayerName`: samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs now defines `PlayerName` (Property)
+- Added symbol `Score`: samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs now defines `Score` (Property)
+- Added symbol `Lines`: samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs now defines `Lines` (Property)
+- Added symbol `Level`: samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs now defines `Level` (Property)
+- Added symbol `CreatedAtUtc`: samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs now defines `CreatedAtUtc` (Property)
+- Added symbol `HighScoreResponse`: samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScoreResponse.cs now defines `HighScoreResponse` (Class)
+- Added symbol `Items`: samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScoreResponse.cs now defines `Items` (Property)
+- Added symbol `SubmitHighScoreRequest`: samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs now defines `SubmitHighScoreRequest` (Class)
+- Added symbol `PlayerName`: samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs now defines `PlayerName` (Property)
+- Added symbol `Score`: samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs now defines `Score` (Property)
+- Added symbol `Lines`: samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs now defines `Lines` (Property)
+- Added symbol `Level`: samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs now defines `Level` (Property)
+- Added symbol `ScoreValidator`: samples/tetris-demo/backend/TetrisDemo.Api/Services/ScoreValidator.cs now defines `ScoreValidator` (Class)
+- Added symbol `IsPlausible`: samples/tetris-demo/backend/TetrisDemo.Api/Services/ScoreValidator.cs now defines `IsPlausible` (Method)
+- Added symbol `HighScore`: samples/tetris-demo/frontend/src/api/highscores.ts now defines `HighScore` (Interface)
+- Added symbol `HighScoreResponse`: samples/tetris-demo/frontend/src/api/highscores.ts now defines `HighScoreResponse` (Interface)
+- Added symbol `SubmitHighScoreRequest`: samples/tetris-demo/frontend/src/api/highscores.ts now defines `SubmitHighScoreRequest` (Interface)
+- Added symbol `ActivePiece`: samples/tetris-demo/frontend/src/game/engine.ts now defines `ActivePiece` (Interface)
+- Added symbol `GameState`: samples/tetris-demo/frontend/src/game/engine.ts now defines `GameState` (Interface)
+- Added symbol `TetrisGame`: samples/tetris-demo/frontend/src/game/engine.ts now defines `TetrisGame` (Class)
+- Added symbol `GameRenderer`: samples/tetris-demo/frontend/src/game/renderer.ts now defines `GameRenderer` (Class)
+- Added symbol `PieceType`: samples/tetris-demo/frontend/src/game/tetrominoes.ts now defines `PieceType` (TypeAlias)
+- Added symbol `Matrix`: samples/tetris-demo/frontend/src/game/tetrominoes.ts now defines `Matrix` (TypeAlias)
+- Added symbol `PieceDefinition`: samples/tetris-demo/frontend/src/game/tetrominoes.ts now defines `PieceDefinition` (Interface)
+- Added symbol `mustGet`: samples/tetris-demo/frontend/src/main.ts now defines `mustGet` (Function)
+- Added symbol `HighScoreTable`: samples/tetris-demo/frontend/src/ui/highscore-table.ts now defines `HighScoreTable` (Class)
+
+## API Changes
+- Added API `SqliteHighScoreStore`: exported `SqliteHighScoreStore` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs
+- Added API `SqliteHighScoreStore`: exported `SqliteHighScoreStore` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs
+- Added API `InitializeAsync`: exported `InitializeAsync` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs
+- Added API `GetTopScoresAsync`: exported `GetTopScoresAsync` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs
+- Added API `InsertAsync`: exported `InsertAsync` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs
+- Added API `HighScore`: exported `HighScore` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs
+- Added API `Id`: exported `Id` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs
+- Added API `PlayerName`: exported `PlayerName` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs
+- Added API `Score`: exported `Score` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs
+- Added API `Lines`: exported `Lines` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs
+- Added API `Level`: exported `Level` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs
+- Added API `CreatedAtUtc`: exported `CreatedAtUtc` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs
+- Added API `HighScoreResponse`: exported `HighScoreResponse` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScoreResponse.cs
+- Added API `Items`: exported `Items` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScoreResponse.cs
+- Added API `SubmitHighScoreRequest`: exported `SubmitHighScoreRequest` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs
+- Added API `PlayerName`: exported `PlayerName` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs
+- Added API `Score`: exported `Score` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs
+- Added API `Lines`: exported `Lines` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs
+- Added API `Level`: exported `Level` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs
+- Added API `ScoreValidator`: exported `ScoreValidator` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Services/ScoreValidator.cs
+- Added API `IsPlausible`: exported `IsPlausible` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Services/ScoreValidator.cs
+- Added API `HighScore`: exported `HighScore` is now available in samples/tetris-demo/frontend/src/api/highscores.ts
+- Added API `HighScoreResponse`: exported `HighScoreResponse` is now available in samples/tetris-demo/frontend/src/api/highscores.ts
+- Added API `SubmitHighScoreRequest`: exported `SubmitHighScoreRequest` is now available in samples/tetris-demo/frontend/src/api/highscores.ts
+- Added API `ActivePiece`: exported `ActivePiece` is now available in samples/tetris-demo/frontend/src/game/engine.ts
+- Added API `GameState`: exported `GameState` is now available in samples/tetris-demo/frontend/src/game/engine.ts
+- Added API `TetrisGame`: exported `TetrisGame` is now available in samples/tetris-demo/frontend/src/game/engine.ts
+- Added API `GameRenderer`: exported `GameRenderer` is now available in samples/tetris-demo/frontend/src/game/renderer.ts
+- Added API `PieceType`: exported `PieceType` is now available in samples/tetris-demo/frontend/src/game/tetrominoes.ts
+- Added API `Matrix`: exported `Matrix` is now available in samples/tetris-demo/frontend/src/game/tetrominoes.ts
+- Added API `PieceDefinition`: exported `PieceDefinition` is now available in samples/tetris-demo/frontend/src/game/tetrominoes.ts
+- Added API `HighScoreTable`: exported `HighScoreTable` is now available in samples/tetris-demo/frontend/src/ui/highscore-table.ts
+- Modified `samples/tetris-demo/backend/TetrisDemo.Api/Program.cs`: samples/tetris-demo/backend/TetrisDemo.Api/Program.cs symbols: <none>
+- Modified `samples/tetris-demo/frontend/src/main.ts`: samples/tetris-demo/frontend/src/main.ts symbols: mustGet
+- Added `samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs`: samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs symbols: SqliteHighScoreStore, SqliteHighScoreStore, InitializeAsync, GetTopScoresAsync, InsertAsync
+- Added `samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs`: samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs symbols: HighScore, Id, PlayerName, Score, Lines, Level, CreatedAtUtc
+- Added `samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScoreResponse.cs`: samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScoreResponse.cs symbols: HighScoreResponse, Items
+- Added `samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs`: samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs symbols: SubmitHighScoreRequest, PlayerName, Score, Lines, Level
+- Added `samples/tetris-demo/backend/TetrisDemo.Api/Services/ScoreValidator.cs`: samples/tetris-demo/backend/TetrisDemo.Api/Services/ScoreValidator.cs symbols: ScoreValidator, IsPlausible
+- Added `samples/tetris-demo/frontend/src/api/highscores.ts`: samples/tetris-demo/frontend/src/api/highscores.ts symbols: HighScore, HighScoreResponse, SubmitHighScoreRequest
+- Added `samples/tetris-demo/frontend/src/game/engine.ts`: samples/tetris-demo/frontend/src/game/engine.ts symbols: ActivePiece, GameState, TetrisGame
+- Added `samples/tetris-demo/frontend/src/game/renderer.ts`: samples/tetris-demo/frontend/src/game/renderer.ts symbols: GameRenderer
+- Added `samples/tetris-demo/frontend/src/game/tetrominoes.ts`: samples/tetris-demo/frontend/src/game/tetrominoes.ts symbols: PieceType, Matrix, PieceDefinition
+- Added `samples/tetris-demo/frontend/src/ui/highscore-table.ts`: samples/tetris-demo/frontend/src/ui/highscore-table.ts symbols: HighScoreTable
+- Added symbol `SqliteHighScoreStore`: samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs now defines `SqliteHighScoreStore` (Class)
+- Added symbol `SqliteHighScoreStore`: samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs now defines `SqliteHighScoreStore` (Constructor)
+- Added symbol `InitializeAsync`: samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs now defines `InitializeAsync` (Method)
+- Added symbol `GetTopScoresAsync`: samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs now defines `GetTopScoresAsync` (Method)
+- Added symbol `InsertAsync`: samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs now defines `InsertAsync` (Method)
+- Added symbol `HighScore`: samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs now defines `HighScore` (Class)
+- Added symbol `Id`: samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs now defines `Id` (Property)
+- Added symbol `PlayerName`: samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs now defines `PlayerName` (Property)
+- Added symbol `Score`: samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs now defines `Score` (Property)
+- Added symbol `Lines`: samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs now defines `Lines` (Property)
+- Added symbol `Level`: samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs now defines `Level` (Property)
+- Added symbol `CreatedAtUtc`: samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs now defines `CreatedAtUtc` (Property)
+- Added symbol `HighScoreResponse`: samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScoreResponse.cs now defines `HighScoreResponse` (Class)
+- Added symbol `Items`: samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScoreResponse.cs now defines `Items` (Property)
+- Added symbol `SubmitHighScoreRequest`: samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs now defines `SubmitHighScoreRequest` (Class)
+- Added symbol `PlayerName`: samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs now defines `PlayerName` (Property)
+- Added symbol `Score`: samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs now defines `Score` (Property)
+- Added symbol `Lines`: samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs now defines `Lines` (Property)
+- Added symbol `Level`: samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs now defines `Level` (Property)
+- Added symbol `ScoreValidator`: samples/tetris-demo/backend/TetrisDemo.Api/Services/ScoreValidator.cs now defines `ScoreValidator` (Class)
+- Added symbol `IsPlausible`: samples/tetris-demo/backend/TetrisDemo.Api/Services/ScoreValidator.cs now defines `IsPlausible` (Method)
+- Added symbol `HighScore`: samples/tetris-demo/frontend/src/api/highscores.ts now defines `HighScore` (Interface)
+- Added symbol `HighScoreResponse`: samples/tetris-demo/frontend/src/api/highscores.ts now defines `HighScoreResponse` (Interface)
+- Added symbol `SubmitHighScoreRequest`: samples/tetris-demo/frontend/src/api/highscores.ts now defines `SubmitHighScoreRequest` (Interface)
+- Added symbol `ActivePiece`: samples/tetris-demo/frontend/src/game/engine.ts now defines `ActivePiece` (Interface)
+- Added symbol `GameState`: samples/tetris-demo/frontend/src/game/engine.ts now defines `GameState` (Interface)
+- Added symbol `TetrisGame`: samples/tetris-demo/frontend/src/game/engine.ts now defines `TetrisGame` (Class)
+- Added symbol `GameRenderer`: samples/tetris-demo/frontend/src/game/renderer.ts now defines `GameRenderer` (Class)
+- Added symbol `PieceType`: samples/tetris-demo/frontend/src/game/tetrominoes.ts now defines `PieceType` (TypeAlias)
+- Added symbol `Matrix`: samples/tetris-demo/frontend/src/game/tetrominoes.ts now defines `Matrix` (TypeAlias)
+- Added symbol `PieceDefinition`: samples/tetris-demo/frontend/src/game/tetrominoes.ts now defines `PieceDefinition` (Interface)
+- Added symbol `mustGet`: samples/tetris-demo/frontend/src/main.ts now defines `mustGet` (Function)
+- Added symbol `HighScoreTable`: samples/tetris-demo/frontend/src/ui/highscore-table.ts now defines `HighScoreTable` (Class)
+- Added API `SqliteHighScoreStore`: exported `SqliteHighScoreStore` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs
+- Added API `SqliteHighScoreStore`: exported `SqliteHighScoreStore` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs
+- Added API `InitializeAsync`: exported `InitializeAsync` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs
+- Added API `GetTopScoresAsync`: exported `GetTopScoresAsync` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs
+- Added API `InsertAsync`: exported `InsertAsync` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Data/SqliteHighScoreStore.cs
+- Added API `HighScore`: exported `HighScore` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs
+- Added API `Id`: exported `Id` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs
+- Added API `PlayerName`: exported `PlayerName` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs
+- Added API `Score`: exported `Score` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs
+- Added API `Lines`: exported `Lines` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs
+- Added API `Level`: exported `Level` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs
+- Added API `CreatedAtUtc`: exported `CreatedAtUtc` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScore.cs
+- Added API `HighScoreResponse`: exported `HighScoreResponse` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScoreResponse.cs
+- Added API `Items`: exported `Items` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/HighScoreResponse.cs
+- Added API `SubmitHighScoreRequest`: exported `SubmitHighScoreRequest` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs
+- Added API `PlayerName`: exported `PlayerName` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs
+- Added API `Score`: exported `Score` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs
+- Added API `Lines`: exported `Lines` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs
+- Added API `Level`: exported `Level` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Models/SubmitHighScoreRequest.cs
+- Added API `ScoreValidator`: exported `ScoreValidator` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Services/ScoreValidator.cs
+- Added API `IsPlausible`: exported `IsPlausible` is now available in samples/tetris-demo/backend/TetrisDemo.Api/Services/ScoreValidator.cs
+- Added API `HighScore`: exported `HighScore` is now available in samples/tetris-demo/frontend/src/api/highscores.ts
+- Added API `HighScoreResponse`: exported `HighScoreResponse` is now available in samples/tetris-demo/frontend/src/api/highscores.ts
+- Added API `SubmitHighScoreRequest`: exported `SubmitHighScoreRequest` is now available in samples/tetris-demo/frontend/src/api/highscores.ts
+- Added API `ActivePiece`: exported `ActivePiece` is now available in samples/tetris-demo/frontend/src/game/engine.ts
+- Added API `GameState`: exported `GameState` is now available in samples/tetris-demo/frontend/src/game/engine.ts
+- Added API `TetrisGame`: exported `TetrisGame` is now available in samples/tetris-demo/frontend/src/game/engine.ts
+- Added API `GameRenderer`: exported `GameRenderer` is now available in samples/tetris-demo/frontend/src/game/renderer.ts
+- Added API `PieceType`: exported `PieceType` is now available in samples/tetris-demo/frontend/src/game/tetrominoes.ts
+- Added API `Matrix`: exported `Matrix` is now available in samples/tetris-demo/frontend/src/game/tetrominoes.ts
+- Added API `PieceDefinition`: exported `PieceDefinition` is now available in samples/tetris-demo/frontend/src/game/tetrominoes.ts
+- Added API `HighScoreTable`: exported `HighScoreTable` is now available in samples/tetris-demo/frontend/src/ui/highscore-table.ts
+

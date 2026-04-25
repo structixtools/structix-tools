@@ -76,20 +76,25 @@ Content-Type: application/json
 
 ## Suggested demo workflow
 
-Once you make a few changes to this sample, you can run:
+This repo now supports repo-relative path filters, so you can analyze this sample while keeping it inside the main monorepo.
 
 ### Structix
 
 ```bash
 cd vAnthropic
-cargo run -- diff ../samples/tetris-demo --from main --to HEAD --html -o ../site/examples/tetris-structix-report.html
+cargo run -- diff .. --from ecce58c --to f2123e8 --path samples/tetris-demo --html -o ../site/examples/tetris-structix-report.html
 ```
 
 ### Analyzer
 
 ```bash
 cd vOpenAI
-cargo run -p analyzer-cli -- --repo ../samples/tetris-demo --base main --head HEAD --format html > ../site/examples/tetris-analyzer-report.html
+cargo run -p analyzer-cli -- --repo .. --base ecce58c --head f2123e8 --path samples/tetris-demo --format html > ../site/examples/tetris-analyzer-report.html
+cargo run -p analyzer-cli -- --repo .. --base ecce58c --head f2123e8 --path samples/tetris-demo --format pr-comment > ../site/examples/tetris-analyzer-pr-comment.txt
 ```
 
-Adjust refs as needed.
+### Generated samples checked into the repo
+
+- [`../../site/examples/tetris-structix-report.html`](../../site/examples/tetris-structix-report.html)
+- [`../../site/examples/tetris-analyzer-report.html`](../../site/examples/tetris-analyzer-report.html)
+- [`../../site/examples/tetris-analyzer-pr-comment.txt`](../../site/examples/tetris-analyzer-pr-comment.txt)

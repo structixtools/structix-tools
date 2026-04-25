@@ -44,6 +44,14 @@ Open it in a browser to view:
 - [`docs/structix-manual.md`](./docs/structix-manual.md)
 - [`docs/analyzer-manual.md`](./docs/analyzer-manual.md)
 
+## Real Example Reports
+
+Generated sample outputs based on the in-repo TypeScript + C# Tetris demo are available at:
+
+- [`site/examples/tetris-structix-report.html`](./site/examples/tetris-structix-report.html)
+- [`site/examples/tetris-analyzer-report.html`](./site/examples/tetris-analyzer-report.html)
+- [`site/examples/tetris-analyzer-pr-comment.txt`](./site/examples/tetris-analyzer-pr-comment.txt)
+
 ## Repo Layout
 
 ```text

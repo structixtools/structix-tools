@@ -191,32 +191,30 @@ cargo build --release -p analyzer-cli</code></pre>
         <div class="grid two">
           <article class="card example-card">
             <h3>Structix HTML report</h3>
-            <p>Interactive entity-level diff report with change pills, file navigation, and architecture-flow visualization.</p>
+            <p>Real sample generated from the TypeScript + C# Tetris demo as it evolved from scaffold to gameplay plus SQLite-backed high scores.</p>
             <div class="example-preview browser-frame">
               <div class="browser-bar"></div>
-              <iframe src="./examples/structix-report.html" title="Structix example report" loading="lazy"></iframe>
+              <iframe src="./examples/tetris-structix-report.html" title="Structix Tetris example report" loading="lazy"></iframe>
             </div>
             <div class="cta-row">
-              <a class="button secondary" href="./examples/structix-report.html">Open example report</a>
+              <a class="button secondary" href="./examples/tetris-structix-report.html">Open Structix HTML sample</a>
             </div>
           </article>
 
           <article class="card example-card">
-            <h3>Analyzer PR comment</h3>
-            <p>Compact review-ready output for pull requests, CI jobs, and summary bots.</p>
+            <h3>Analyzer HTML + PR comment</h3>
+            <p>Real Analyzer outputs for the same Tetris demo change range, including HTML review output and a PR-comment summary.</p>
             <pre class="example-pre"><code>## Risk
-- No high-risk API changes detected.
+- risk 20%: Added API `SqliteHighScoreStore`
+- risk 20%: Added API `InitializeAsync`
+- risk 20%: Added API `GetTopScoresAsync`
 
 # Change Report
 
-Detected 115 exact clone groups.
-
-## Highlights
-- Exact clone group across multiple ASP.NET Core template DbContext files
-- Exact clone group across Angular resolver index files
-- Exact clone group across AutoMapper integration types</code></pre>
+Detected 10 added files, 2 modified files, 33 symbol changes, and 32 api changes.</code></pre>
             <div class="cta-row">
-              <a class="button secondary" href="./examples/analyzer-pr-comment.txt">Open text sample</a>
+              <a class="button secondary" href="./examples/tetris-analyzer-report.html">Open Analyzer HTML sample</a>
+              <a class="button secondary" href="./examples/tetris-analyzer-pr-comment.txt">Open PR-comment sample</a>
             </div>
           </article>
         </div>
