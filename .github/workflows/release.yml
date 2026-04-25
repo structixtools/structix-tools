@@ -1,0 +1,87 @@
+name: Build release binaries
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-structix:
+    name: Structix • ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            label: linux-x86_64
+            bin: structix
+            asset: structix-linux-x86_64
+          - os: windows-latest
+            label: windows-x86_64
+            bin: structix.exe
+            asset: structix-windows-x86_64.exe
+          - os: macos-latest
+            label: macos-x86_64-or-arm64
+            bin: structix
+            asset: structix-macos
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build Structix
+        working-directory: vAnthropic
+        run: cargo build --release
+      - name: Stage asset (Unix)
+        if: runner.os != 'Windows'
+        run: cp vAnthropic/target/release/${{ matrix.bin }} ${{ matrix.asset }}
+      - name: Stage asset (Windows)
+        if: runner.os == 'Windows'
+        run: copy vAnthropic\target\release\${{ matrix.bin }} ${{ matrix.asset }}
+        shell: cmd
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ${{ matrix.asset }}
+
+  build-analyzer:
+    name: Analyzer • ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            label: linux-x86_64
+            bin: analyzer-cli
+            asset: analyzer-cli-linux-x86_64
+          - os: windows-latest
+            label: windows-x86_64
+            bin: analyzer-cli.exe
+            asset: analyzer-cli-windows-x86_64.exe
+          - os: macos-latest
+            label: macos-x86_64-or-arm64
+            bin: analyzer-cli
+            asset: analyzer-cli-macos
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build Analyzer
+        working-directory: vOpenAI
+        run: cargo build --release -p analyzer-cli
+      - name: Stage asset (Unix)
+        if: runner.os != 'Windows'
+        run: cp vOpenAI/target/release/${{ matrix.bin }} ${{ matrix.asset }}
+      - name: Stage asset (Windows)
+        if: runner.os == 'Windows'
+        run: copy vOpenAI\target\release\${{ matrix.bin }} ${{ matrix.asset }}
+        shell: cmd
+      - name: Upload release asset
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: ${{ matrix.asset }}

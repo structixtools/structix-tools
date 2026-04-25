@@ -1,0 +1,3 @@
+[workspace]
+members = ["crates/analyzer-core", "crates/analyzer-cli"]
+resolver = "2"

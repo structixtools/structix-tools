@@ -1,0 +1,25 @@
+# Rust / build outputs
+/target/
+**/target/
+_site/
+artifacts/
+**/artifacts/
+
+# Local tool state
+.claude/
+**/.claude/
+
+# Generated reports / exports
+structix-*.md
+structix-*.json
+structix-*.html
+test-report.html
+*.sha256
+
+# Logs / temp
+*.log
+*.tmp
+
+# OS noise
+.DS_Store
+Thumbs.db

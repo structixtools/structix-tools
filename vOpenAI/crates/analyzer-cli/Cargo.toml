@@ -1,0 +1,15 @@
+[package]
+name = "analyzer-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+analyzer-core = { path = "../analyzer-core" }
+
+[lib]
+name = "analyzer_cli"
+path = "src/lib.rs"
+
+[[bin]]
+name = "analyzer-cli"
+path = "src/main.rs"
